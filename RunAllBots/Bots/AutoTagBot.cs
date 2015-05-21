@@ -21,15 +21,9 @@ using System.Xml.Linq;
 namespace RedditBots {
 
     class AutoTagBot : AbstractBot {
-        private const string PixivBaseUrl = "http://spapi.pixiv.net/iphone/illust.php";
-        private const string SauceNAOBaseUrl = "http://saucenao.com/search.php";
-        private const string SauceNAOAPIKey = "07c14d9e56055d3f9119b4fba0cef10b42824057";
         private const string AniDBDumpUrl = "http://anidb.net/api/anime-titles.xml.gz";
         private const int MaxDBAgeHours = 168;
 
-        private string retVal;
-
-        Reddit reddit;
 
 
         public AutoTagBot() {
@@ -39,7 +33,7 @@ namespace RedditBots {
         /// <summary>
         /// Runs the bot
         /// </summary>
-        public string Run() {
+        public override string Run() {
 
             //TODO: Add scanned images to a database so they aren't scanned again.
             user = reddit.LogIn("AutoTagBot", "11noah");
@@ -49,19 +43,22 @@ namespace RedditBots {
             int numOfPostsChecked = 0;
             //Checks if there were any untagged reddit posts.
             foreach (Post post in untaggedPosts) {
-                numOfPostsChecked++;
-                //Gets the title of the anime the image is from. A very convoluted process...
-                String title = GetImageTitleTag(post.Url.ToString());
-                Console.WriteLine(post.Title + " -- Source: " + title);
-                reddit.ComposePrivateMessage("Untagged post found", "An untagged post was found: " + post.Title, "chiefnoah");
-                //TODO: Flair post. Comment.
-                //post.SetFlair(title, "");
-                //post.Comment("*TODO:* \n\n* Autoflairbot messsage.\n\n* Add ability for users to message bot and have flair removed");
+                if (!CheckIfPostSaved(1, post.Id)) {
+                    numOfPostsChecked++;
+                    //Gets the title of the anime the image is from. A very convoluted process...
+                    String title = GetImageTitleTag(post.Url.ToString());
+                    Console.WriteLine(post.Title + " -- Source: " + title);
+                    //reddit.ComposePrivateMessage("Untagged post found", "An untagged post was found: " + post.Title, "chiefnoah");
+                    //TODO: Flair post. Comment.
+                    //post.SetFlair(title, "");
+                    //post.Comment("*TODO:* \n\n* Autoflairbot messsage.\n\n* Add ability for users to message bot and have flair removed");
+                    SavePost(1, "AutoTagBot", post.Id);
+                }
             }
             retVal += "\r\nTotal scanned: " + numOfPostsChecked;
             Console.WriteLine("Done.");
+            Console.Read();
             return retVal;
-            //Console.Read();
         }
 
         /// <summary>
@@ -102,6 +99,7 @@ namespace RedditBots {
         /// <param name="user"></param>
         /// <returns></returns>
         public List<Post> GetUntaggedRedditPosts(AuthenticatedUser user) {
+            //Subreddit subreddit = reddit.GetSubreddit("/r/chiefnoahstests");
             Subreddit subreddit = reddit.GetSubreddit("/r/awwnime");
 
             List<RedditSharp.Things.Post> untaggedPosts = new List<RedditSharp.Things.Post>();

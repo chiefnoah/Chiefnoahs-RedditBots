@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 namespace RedditBots {
     class RunAllBots {
         static void Main(string[] args) {
-            AutoTagBot autoTagBot = new AutoTagBot();
-            WriteLog(autoTagBot.Run());
+            //AutoTagBot autoTagBot = new AutoTagBot();
+            //WriteLog(autoTagBot.Run());
+            BotKanMusus kanmusu = new BotKanMusus();
+            WriteLog(kanmusu.Run());
         }
 
         private static void WriteLog(string log)

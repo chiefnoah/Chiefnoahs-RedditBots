@@ -1,0 +1,14 @@
+﻿<Properties StartupItem="RunAllBots\RedditBots.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="RunAllBots\Bots\BotKanMusus.cs">
+    <Files>
+      <File FileName="RunAllBots\Bots\BotKanMusus.cs" Line="118" Column="80" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="F:\Development\C#\RedditBots\RunAllBots\Bots\BotKanMusus.cs" line="126" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
