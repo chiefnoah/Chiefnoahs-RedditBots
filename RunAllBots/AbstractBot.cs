@@ -20,7 +20,7 @@ namespace RunAllBots {
 
         protected string retVal;
         protected Reddit reddit;
-        protected AuthenticatedUser user;
+        protected SortedList<string, AuthenticatedUser> users;
 
         protected const string PixivBaseUrl = "http://spapi.pixiv.net/iphone/illust.php";
         protected const string PixivPAPIBaseUrl = "https://public-api.secure.pixiv.net/v1";
@@ -127,9 +127,9 @@ namespace RunAllBots {
             string regexPattern = @"illust_id=\d+";
 
             foreach (var comment in post.Comments) {
-                if((comment.Author == post.Author.ToString() || comment.Author == "SauceHunt") && comment.Body.Contains("illust_id=")) {
+                if ((comment.Author == post.Author.ToString() || comment.Author == "SauceHunt") && comment.Body.Contains("illust_id=")) {
                     Match match = Regex.Match(comment.Body, regexPattern);
-                    if(match.Success) {
+                    if (match.Success) {
                         return match.Value.Substring(10);
                     }
                 }
@@ -158,10 +158,10 @@ namespace RunAllBots {
                 retVal += "\r\nCould not find source for: " + imageUrl;
             } catch (WebException e) {
                 retVal += "SauceNAO Error: " + e.Message;
-                int derp = e.HResult;
-                Console.Write(derp);
-                Console.Read();
-                return "API Request quote maxed";
+                return null;
+            } catch (JsonReaderException e) {
+                retVal += "\r\nSauceNao Error: No source or not parsable image: " + imageUrl;
+                return null;
             }
             return null; //This should *never* be reached
         }
@@ -173,9 +173,9 @@ namespace RunAllBots {
         /// <returns></returns>
         protected String[] GetImageTagsByPixivId(string id) {
             if (id == null) {
-                return new string[] {};
+                return new string[] { };
             }
-            HttpWebRequest req = (HttpWebRequest) HttpWebRequest.Create(PixivPAPIBaseUrl + "/works/" + id + ".json");
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(PixivPAPIBaseUrl + "/works/" + id + ".json");
             req.Method = "GET";
             req.ContentType = "application/x-www-form-urlencoded";
 
@@ -189,8 +189,8 @@ namespace RunAllBots {
                 Stream stream = res.GetResponseStream();
                 StreamReader reader = new StreamReader(stream, Encoding.UTF8);
                 jsonOutput = reader.ReadToEnd();
-            } catch (WebException e) {
-                return new string[] {};
+            } catch (WebException) {
+                return new string[] { };
             }
 
             PixivResponse.Works works = JsonConvert.DeserializeObject<PixivResponse.Works>(jsonOutput);
@@ -198,7 +198,7 @@ namespace RunAllBots {
             if (works.status == "success") {
                 return works.response[0].tags;
             }
-            return new string[] {};
+            return new string[] { };
         }
 
 
@@ -241,21 +241,24 @@ namespace RunAllBots {
         /// Scans the bots inbox and forwards them 
         /// </summary>
         protected void ForwardInbox(int botId, string botName) {
-            if (user != null) {
-                foreach (var m in user.UnreadMessages.Take(5)) {
-                    //Console.WriteLine("Found unread messages\r\nKind: " + m.Kind);
-                    //t1 = comment
-                    if (m.Kind == "t1") {
-                        var comment = (RedditSharp.Things.Comment)m;
-                        if (!CheckIfPostSaved(botId, comment.Id)) {
-                            reddit.ComposePrivateMessage("Bot Inbox Forward",
-                                "From: " + comment.Author +
-                                "\r\n\r\nSubreddit: " + comment.Subreddit +
-                            "\r\n\r\nContent: " + comment.Body, "chiefnoah");
-                            SavePost(botId, botName, comment.Id);
+            if (users != null && users.Count > 0) {
+                foreach (KeyValuePair<string, AuthenticatedUser> user in users) {
+                    foreach (var m in user.Value.UnreadMessages.Take(5)) {
+                        //Console.WriteLine("Found unread messages\r\nKind: " + m.Kind);
+                        //t1 = comment
+                        if (m.Kind == "t1") {
+                            var comment = (RedditSharp.Things.Comment)m;
+                            if (!CheckIfPostSaved(botId, comment.Id)) {
+                                reddit.ComposePrivateMessage("Bot Inbox Forward",
+                                    "From: " + comment.Author +
+                                    "\r\n\r\nSubreddit: " + comment.Subreddit +
+                                "\r\n\r\nContent: " + comment.Body, "chiefnoah");
+                                SavePost(botId, botName, comment.Id);
+                            }
                         }
                     }
                 }
+
 
             }
         }
