@@ -39,6 +39,9 @@ namespace RedditBots {
                 }
             }
             foreach (Post post in GetRecentPosts(subreddits)) {
+                if (CheckIfPostSaved(post.Id)) {
+                    continue;
+                }
                 string[] tags;
                 string pixivId = GetPixivIdFromComments(post);
                 tags = GetImageTagsByPixivId(pixivId);
@@ -65,7 +68,7 @@ namespace RedditBots {
                                         select p).ToList());
                     //Removes duplicates. This is probably pretty slow, but I don't care
                     bot.Posts = bot.Posts.Distinct().ToList();
-
+                    
                     //Loop through all the posts that were just added, save them and then comment on them
                     foreach (Post postToCommentOn in bot.Posts) {
                         //CommentOnPost(bot, post);
