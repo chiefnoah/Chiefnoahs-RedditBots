@@ -1,4 +1,5 @@
-﻿namespace RedditBots {
+﻿using System.Collections.Generic;
+namespace RedditBots {
 
 
     /// <remarks/>
@@ -37,6 +38,11 @@
         private byte idField;
 
         private bool enabledField;
+
+        //private List<TaggedPost> posts;
+
+        [System.Xml.Serialization.XmlIgnore]
+        public List<RedditSharp.Things.Post> Posts { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("Subreddit", IsNullable = false)]
