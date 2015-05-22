@@ -103,6 +103,42 @@ namespace RunAllBots {
         }
 
         /// <summary>
+        /// Returns whether the provided postID has been saved to table botname
+        /// </summary>
+        /// <param name="botID">ID of the bot</param>
+        /// <param name="postID">ID of the Reddit post to search for</param>
+        /// <returns></returns>
+        protected Boolean CheckIfPostSaved(string postID) {
+            String sql = "SELECT EXISTS(SELECT * FROM BotData WHERE postId =\"" + postID + "\");";
+
+            IDbCommand dbcmd = dbConnection.CreateCommand();
+            dbcmd.CommandText = sql;
+            IDataReader reader = dbcmd.ExecuteReader();
+
+            //We don't actually want to read the results, we just want to check if the object exists
+            while (reader.Read()) {
+                bool exists = reader.GetBoolean(0);
+                if (exists) {
+                    reader.Close();
+                    reader = null;
+                    dbcmd.Dispose();
+                    dbcmd = null;
+
+                    return true;
+                }
+
+            }
+
+            //Perform cleanup
+            reader.Close();
+            reader = null;
+            dbcmd.Dispose();
+            dbcmd = null;
+
+            return false;
+        }
+
+        /// <summary>
         /// Initializes the database.
         /// </summary>
         private void InitializeDatabase() {
