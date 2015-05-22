@@ -16,8 +16,8 @@ namespace RedditBots {
             retVal += "\r\nDate: " + DateTime.Now;
             retVal += "\r\nNumber of KanMusu bots running: " + bots.Count;
             RunAllBots(bots);
-			Console.WriteLine ("\r\nDone!");
-			//Console.Read ();
+            Console.WriteLine("\r\nDone!");
+            //Console.Read ();
             return retVal;
         }
 
@@ -26,51 +26,52 @@ namespace RedditBots {
         /// </summary>
         /// <param name="bots"></param>
         public void RunAllBots(List<KanMususBot> bots) {
+            List<RedditSharp.Things.Post> toCommentOn = new List<RedditSharp.Things.Post>();
+            List<string> subreddits = new List<string>();
+            if (users == null) {
+                users = new SortedList<string, AuthenticatedUser>();
+            }
             foreach (KanMususBot bot in bots) {
-                user = reddit.LogIn(bot.username, bot.password);
+                users.Add(bot.username, reddit.LogIn(bot.username, bot.password));
                 ForwardInbox(bot.id, bot.username);
-                List<RedditSharp.Things.Post> posts = GetNewPosts(bot);
-                List<RedditSharp.Things.Post> toCommentOn = new List<RedditSharp.Things.Post>();
-                foreach (Post post in posts) {
-                    string[] tags;
-                    string pixivId = GetPixivIdFromComments(post);
+                foreach (KanMususBotSubreddit subr in bot.Subreddits) {
+                    subreddits.Add(subr.Value);
+                }
+            }
+            foreach (Post post in GetRecentPosts(subreddits)) {
+                string[] tags;
+                string pixivId = GetPixivIdFromComments(post);
+                tags = GetImageTagsByPixivId(pixivId);
+                if (pixivId == null || tags.Count() < 1) {
+                    pixivId = GetImageSourceId(post.Url.ToString());
                     tags = GetImageTagsByPixivId(pixivId);
-                    if (pixivId == null || tags.Count() < 1) {
-                        pixivId = GetImageSourceId(post.Url.ToString());
-                        tags = GetImageTagsByPixivId(pixivId);
+                }
+
+                //Compares tags in all posts to the tags in all bots
+                foreach (KanMususBot bot in bots) {
+                    bot.Posts = (from bt in bot.Tags
+                                 let p = post
+                                 from pt in tags
+                                 where pt == bt
+                                 select p).ToList();
+                    if (post.LinkFlairText == null) {
+                        post.LinkFlairText = "";
                     }
-                    //Console.Write(tags);
-                    foreach (string botTag in bot.Tags) {
-                        foreach (string tag in tags) {
-                            if (tag == botTag) {
-                                toCommentOn.Add(post);
-                            }
-                        }
-                        
-                        //Performs a LINQ query to check if it should search the title or flair for a title.
-                        //This helps avoid false positives (but will also likely decrease overall accuracy)
-                        bool searchTitleFlair = (from s in bot.Subreddits
-                                                where s.SearchTitleFlair && s.Value.Contains(post.Subreddit)
-                                                select s).Any();
-                        if (searchTitleFlair) {
-                            //Quick fix for nullpo
-                            if (post.LinkFlairText == null) {
-                                post.LinkFlairText = "";
-                            }
-                            if (post.Title.IndexOf(botTag) > 0 || post.LinkFlairText.IndexOf(botTag) > 0) {
-                                toCommentOn.Add(post);
-                            }
-                        }
+                    //Adds posts from subreddits that are allowed to search title or flair
+                    bot.Posts.AddRange((from sr in bot.Subreddits
+                                        from bt in bot.Tags
+                                        let p = post
+                                        where sr.SearchTitleFlair && (p.Title.Contains(bt) || p.LinkFlairText.Contains(bt))
+                                        select p).ToList());
+                    //Removes duplicates. This is probably pretty slow, but I don't care
+                    bot.Posts = bot.Posts.Distinct().ToList();
 
-
+                    //Loop through all the posts that were just added, save them and then comment on them
+                    foreach (Post postToCommentOn in bot.Posts) {
+                        //CommentOnPost(bot, post);
+                        retVal += "\r\nBot " + bot.username + " commented on " + toCommentOn.Count() + " posts";
                     }
                     SavePost(bot.id, bot.username, post.Id);
-                }
-                //This should make everything unique so we don't get posts
-                toCommentOn = toCommentOn.Distinct().ToList();
-                foreach (Post post in toCommentOn) {
-                    retVal += "\r\nBot " + bot.username + " commented on " + toCommentOn.Count() + " posts";
-                    //CommentOnPost(bot, post);
                 }
             }
         }
@@ -89,27 +90,23 @@ namespace RedditBots {
         }
 
         /// <summary>
-        /// Returns posts from the bots enabled subreddits that have not been previously scanned
+        /// Returns the 10 latest posts from all subreddits passed as an argument
         /// </summary>
-        /// <param name="bot"></param>
+        /// <param name="subs">string array of all the subreddits to get posts from</param>
         /// <returns></returns>
-        public List<RedditSharp.Things.Post> GetNewPosts(KanMususBot bot) {
+        public List<Post> GetRecentPosts(List<string> subs) {
             List<Post> allPosts = new List<Post>();
 
             //Load access to all subreddits enabled for the bot
-            List<RedditSharp.Things.Subreddit> subs = new List<RedditSharp.Things.Subreddit>();
-            foreach (var sub in bot.Subreddits) {
-                subs.Add(reddit.GetSubreddit(sub.Value));
+            List<RedditSharp.Things.Subreddit> subreddits = new List<RedditSharp.Things.Subreddit>();
+            for (int i = 0; i < subs.Count(); i++) {
+                subreddits.Add(reddit.GetSubreddit(subs[i]));
             }
 
             //The way I do it is super ineficient (I could condense it to one loop) but this could help prevent errors... mabye?
             //Either way, I'm too lazy to rewrite it
-            foreach (var subreddit in subs) {
-                foreach (var post in subreddit.New.Take(10)) {
-                    if (!CheckIfPostSaved(bot.id, post.Id)) {
-                        allPosts.Add(post);
-                    }
-                }
+            foreach (var subreddit in subreddits) {
+                allPosts.AddRange(subreddit.New.Take(10));
             }
             retVal += "\r\nFound " + allPosts.Count + " new posts to scan";
             return allPosts;
@@ -120,17 +117,23 @@ namespace RedditBots {
         /// </summary>
         /// <returns></returns>
         public List<KanMususBot> GetAllBots() {
-            System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(KanMusus));
-            String filepath = "./Bots/Data/KanMususData.xml";
-            System.IO.StreamReader file = new System.IO.StreamReader(filepath);
-            KanMusus kanmusus = new KanMusus();
-            kanmusus = (KanMusus)reader.Deserialize(file);
-            List<KanMususBot> allBots = kanmusus.Bot.ToList<KanMususBot>();
-            List<KanMususBot> enabledBots =
-                (from bot in allBots
-                 where bot.enabled == true
-                 select bot).ToList<KanMususBot>();
-            return enabledBots;
+            try {
+                System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(KanMusus));
+                String filepath = "./Bots/Data/KanMususData.xml";
+                System.IO.StreamReader file = new System.IO.StreamReader(filepath);
+                KanMusus kanmusus = new KanMusus();
+                kanmusus = (KanMusus)reader.Deserialize(file);
+                List<KanMususBot> allBots = kanmusus.Bot.ToList<KanMususBot>();
+                List<KanMususBot> enabledBots =
+                    (from bot in allBots
+                     where bot.enabled == true
+                     select bot).ToList<KanMususBot>();
+                return enabledBots;
+            } catch (Exception e) {
+                Console.Write(e.Message);
+                Console.Read();
+                return null;
+            }
         }
     }
 }
