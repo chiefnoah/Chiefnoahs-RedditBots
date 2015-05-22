@@ -19,6 +19,7 @@ namespace RedditBots {
             using (StreamWriter sw = File.AppendText("cron.log"))
             {
                 sw.WriteLine(log);
+                Console.Write(log);
             }
         }
     }
