@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 namespace RunAllBots {
     abstract class AbstractBot {
 
-        protected static const string BOT_ADMIN = "chiefnoah";
+        protected const string BOT_ADMIN = "chiefnoah";
 
         protected string retVal;
         protected Reddit reddit;
@@ -197,7 +197,7 @@ namespace RunAllBots {
             } catch (WebException e) {
                 retVal += "SauceNAO Error: " + e.Message;
                 return null;
-            } catch (JsonReaderException e) {
+            } catch (JsonReaderException) {
                 retVal += "\r\nSauceNao Error: No source or not parsable image: " + imageUrl;
                 return null;
             }
