@@ -56,7 +56,7 @@ namespace RedditBots {
                     bot.Posts = (from bt in bot.Tags
                                  let p = post
                                  from pt in tags
-                                 where pt == bt
+                                 where pt.Contains(bt)
                                  select p).ToList();
                     if (post.LinkFlairText == null) {
                         post.LinkFlairText = "";
