@@ -13,9 +13,10 @@ namespace RedditBots {
 
         public override String Run() {
             List<KanMususBot> bots = GetAllBots();
-            retVal += "\r\nDate: " + DateTime.Now;
+            retVal += "\r\nStarted: " + DateTime.Now;
             retVal += "\r\nNumber of KanMusu bots running: " + bots.Count;
             RunAllBots(bots);
+            retVal += "\r\nStarted: " + DateTime.Now + "\r\n\r\n";
             Console.WriteLine("\r\nDone!");
             //Console.Read ();
             return retVal;
@@ -28,6 +29,7 @@ namespace RedditBots {
         public void RunAllBots(List<KanMususBot> bots) {
             List<RedditSharp.Things.Post> toCommentOn = new List<RedditSharp.Things.Post>();
             List<string> subreddits = new List<string>();
+            int newPostsCount = 0;
             if (users == null) {
                 users = new SortedList<string, AuthenticatedUser>();
             }
@@ -43,6 +45,9 @@ namespace RedditBots {
                 if (CheckIfPostSaved(post.Id)) {
                     continue;
                 }
+                //Increment the counter
+                newPostsCount++;
+                //Console.WriteLine("Scanning a new post...");
                 string[] tags;
                 string pixivId = GetPixivIdFromComments(post);
                 tags = GetImageTagsByPixivId(pixivId);
@@ -78,6 +83,7 @@ namespace RedditBots {
                     SavePost(bot.id, bot.username, post.Id);
                 }
             }
+            retVal += "\r\nScanned " + newPostsCount + "\r\n";
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace RedditBots {
             foreach (var subreddit in subreddits) {
                 allPosts.AddRange(subreddit.New.Take(10));
             }
-            retVal += "\r\nFound " + allPosts.Count + " new posts to scan";
+            //retVal += "\r\nFound " + allPosts.Count + " new posts to scan";
             return allPosts;
         }
 
