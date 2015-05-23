@@ -16,7 +16,7 @@ namespace RedditBots {
             retVal += "\r\nStarted: " + DateTime.Now;
             retVal += "\r\nNumber of KanMusu bots running: " + bots.Count;
             RunAllBots(bots);
-            retVal += "\r\nStarted: " + DateTime.Now + "\r\n\r\n";
+            retVal += "\r\nFinished: " + DateTime.Now + "\r\n\r\n";
             Console.WriteLine("\r\nDone!");
             //Console.Read ();
             return retVal;
