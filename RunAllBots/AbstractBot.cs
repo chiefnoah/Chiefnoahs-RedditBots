@@ -18,9 +18,11 @@ using Newtonsoft.Json;
 namespace RunAllBots {
     abstract class AbstractBot {
 
+        protected static const string BOT_ADMIN = "chiefnoah";
+
         protected string retVal;
         protected Reddit reddit;
-        protected SortedList<string, AuthenticatedUser> users;
+        protected AuthenticatedUser user;
 
         protected const string PixivBaseUrl = "http://spapi.pixiv.net/iphone/illust.php";
         protected const string PixivPAPIBaseUrl = "https://public-api.secure.pixiv.net/v1";
@@ -276,29 +278,30 @@ namespace RunAllBots {
         /// <summary>
         /// Scans the bots inbox and forwards them 
         /// </summary>
-        protected void ForwardInbox(int botId, string botName) {
-            if (users != null && users.Count > 0) {
-                foreach (KeyValuePair<string, AuthenticatedUser> user in users) {
-                    foreach (var m in user.Value.UnreadMessages.Take(5)) {
-                        //Console.WriteLine("Found unread messages\r\nKind: " + m.Kind);
-                        //t1 = comment
-                        if (m.Kind == "t1") {
-                            var comment = (RedditSharp.Things.Comment)m;
-                            if (!CheckIfPostSaved(botId, comment.Id)) {
-                                reddit.ComposePrivateMessage("Bot Inbox Forward",
-                                    "From: " + comment.Author +
-                                    "\r\n\r\nSubreddit: " + comment.Subreddit +
-                                "\r\n\r\nContent: " + comment.Body, "chiefnoah");
-                                SavePost(botId, botName, comment.Id);
-                            }
+        protected void ForwardInbox(int botId, string botName, string botPassword) {
+            if (user != null) {
+                foreach (var m in user.UnreadMessages.Take(5)) {
+                    //Console.WriteLine("Found unread messages\r\nKind: " + m.Kind);
+                    //t1 = comment
+                    if (m.Kind == "t1") {
+                        var comment = (RedditSharp.Things.Comment)m;
+                        if (!CheckIfPostSaved(botId, comment.Id)) {
+                            string message = "From: " + comment.Author +
+                                "\r\n\r\nSubreddit: " + comment.Subreddit +
+                            "\r\n\r\nContent: " + comment.Body;
+                            SendMessageToAdmin(botId, botName, botPassword, BOT_ADMIN, message);
+                            SavePost(botId, botName, comment.Id);
                         }
                     }
                 }
-
-
             }
         }
 
-
+        protected void SendMessageToAdmin(int botId, string botName, string botPassword, string to, string message) {
+            if (user.Name != botName) {
+                user = reddit.LogIn(botName, botPassword);
+            }
+            reddit.ComposePrivateMessage("Bot Admin Message", message, to);
+        }
     }
 }
