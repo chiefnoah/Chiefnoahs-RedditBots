@@ -36,12 +36,10 @@ namespace RedditBots {
         public override string Run() {
 
             //TODO: Add scanned images to a database so they aren't scanned again.
-            if (users == null) {
-                users = new SortedList<string, AuthenticatedUser>();
-            }
-            users.Add("AutoTagBot", reddit.LogIn("AutoTagBot", "11noah"));
+
+            user = reddit.LogIn("AutoTagBot", "11noah");
             retVal = "";
-            List<Post> untaggedPosts = GetUntaggedRedditPosts(users.Last().Value);
+            List<Post> untaggedPosts = GetUntaggedRedditPosts(user);
 
             int numOfPostsChecked = 0;
             //Checks if there were any untagged reddit posts.
