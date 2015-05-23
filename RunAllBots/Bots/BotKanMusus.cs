@@ -78,7 +78,7 @@ namespace RedditBots {
                     //Loop through all the posts that were just added, save them and then comment on them
                     foreach (Post postToCommentOn in bot.Posts) {
                         CommentOnPost(bot, post);
-                        retVal += "\r\nBot " + bot.username + " commented on " + toCommentOn.Count() + " posts";
+                        retVal += "\r\nBot " + bot.username + " commented on " + bot.Posts.Count + " posts";
                     }
                     SavePost(bot.id, bot.username, post.Id);
                 }
