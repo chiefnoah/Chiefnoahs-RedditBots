@@ -30,12 +30,10 @@ namespace RedditBots {
             List<RedditSharp.Things.Post> toCommentOn = new List<RedditSharp.Things.Post>();
             List<string> subreddits = new List<string>();
             int newPostsCount = 0;
-            if (users == null) {
-                users = new SortedList<string, AuthenticatedUser>();
-            }
+
             foreach (KanMususBot bot in bots) {
-                users.Add(bot.username, reddit.LogIn(bot.username, bot.password));
-                ForwardInbox(bot.id, bot.username);
+                user = reddit.LogIn(bot.username, bot.password);
+                ForwardInbox(bot.id, bot.username, bot.password);
                 foreach (KanMususBotSubreddit subr in bot.Subreddits) {
                     subreddits.Add(subr.Value);
                 }
@@ -77,7 +75,10 @@ namespace RedditBots {
                     
                     //Loop through all the posts that were just added, save them and then comment on them
                     foreach (Post postToCommentOn in bot.Posts) {
-                        //CommentOnPost(bot, post);
+                        user = reddit.LogIn(bot.username, bot.password);
+                        string message = "Bot " + bot.username + " commented on [" + post.Title + "](" + post.Shortlink + ")";
+                        CommentOnPost(bot, post);
+                        SendMessageToAdmin(bot.id, bot.username, bot.password, BOT_ADMIN, message);
                         retVal += "\r\nBot " + bot.username + " commented on " + bot.Posts.Count + " posts";
                     }
                     SavePost(bot.id, bot.username, post.Id);
