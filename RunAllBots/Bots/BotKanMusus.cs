@@ -38,6 +38,7 @@ namespace RedditBots {
                     subreddits.Add(subr.Value);
                 }
             }
+            subreddits = subreddits.Distinct().ToList();
             foreach (Post post in GetRecentPosts(subreddits)) {
                 if (CheckIfPostSaved(post.Id)) {
                     continue;
