@@ -61,7 +61,7 @@ namespace RedditBots {
                     bot.Posts = (from bt in bot.Tags
                                  let p = post
                                  from pt in tags
-                                 where pt.Contains(bt)
+                                 where bt.Contains(pt)
                                  select p).ToList();
                     if (post.LinkFlairText == null) {
                         post.LinkFlairText = "";
@@ -77,7 +77,7 @@ namespace RedditBots {
                     
                     //Loop through all the posts that were just added, save them and then comment on them
                     foreach (Post postToCommentOn in bot.Posts) {
-                        CommentOnPost(bot, post);
+                        //CommentOnPost(bot, post);
                         retVal += "\r\nBot " + bot.username + " commented on " + bot.Posts.Count + " posts";
                     }
                     SavePost(bot.id, bot.username, post.Id);
