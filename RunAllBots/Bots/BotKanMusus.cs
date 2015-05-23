@@ -56,30 +56,36 @@ namespace RedditBots {
 
                 //Compares tags in all posts to the tags in all bots
                 foreach (KanMususBot bot in bots) {
-                    bot.Posts = (from bt in bot.Tags
-                                 let p = post
-                                 from pt in tags
-                                 where bt.Contains(pt)
-                                 select p).ToList();
+                    Boolean comment = false;
+
+                    /*comment = from bt in bot.Tags
+                               from pt in tags
+                               where bt.Contains(pt)
+                               select true; */
+                    //replaces the old method of checking if posts should be commented on
+                    comment = bot.Tags.Any(bt => tags.Any(t => bt.Contains(t)));
                     if (post.LinkFlairText == null) {
                         post.LinkFlairText = "";
                     }
+                    if (!comment) {
+                        comment = bot.Subreddits.Any(s => bot.Tags.Any(t => s.SearchTitleFlair && (post.Title.Contains(t) || post.LinkFlairText.Contains(t))));
+                    }
                     //Adds posts from subreddits that are allowed to search title or flair
-                    bot.Posts.AddRange((from sr in bot.Subreddits
+                    /*bot.Posts.AddRange((from sr in bot.Subreddits
                                         from bt in bot.Tags
                                         let p = post
                                         where sr.SearchTitleFlair && (p.Title.Contains(bt) || p.LinkFlairText.Contains(bt))
-                                        select p).ToList());
+                                        select p).ToList()); */
                     //Removes duplicates. This is probably pretty slow, but I don't care
-                    bot.Posts = bot.Posts.Distinct().ToList();
+                    //bot.Posts = bot.Posts.Distinct().ToList();
                     
                     //Loop through all the posts that were just added, save them and then comment on them
-                    foreach (Post postToCommentOn in bot.Posts) {
+                    if(comment) {
                         user = reddit.LogIn(bot.username, bot.password);
                         string message = "Bot " + bot.username + " commented on [" + post.Title + "](" + post.Shortlink + ")";
-                        CommentOnPost(bot, post);
+                        //CommentOnPost(bot, post);
                         SendMessageToAdmin(bot.id, bot.username, bot.password, BOT_ADMIN, message);
-                        retVal += "\r\nBot " + bot.username + " commented on " + bot.Posts.Count + " posts";
+                        retVal += "\r\nBot " + bot.username + " commented on " + post.Title + " - " + post.Shortlink;
                     }
                     SavePost(bot.id, bot.username, post.Id);
                 }
