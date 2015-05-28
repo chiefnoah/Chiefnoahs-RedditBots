@@ -291,6 +291,7 @@ namespace RunAllBots {
                             "\r\n\r\nContent: " + comment.Body;
                             SendMessageToAdmin(botId, botName, botPassword, BOT_ADMIN, message);
                             SavePost(botId, botName, comment.Id);
+                            retVal += "\r\nForwarded reply to administrator";
                         }
                     }
                 }
