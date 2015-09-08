@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RunAllBots.PixivResponse {
-    class Works {
+namespace RedditBots {
+    class PixivWorksResponse {
         
 public string status { get; set; }
 public Response[] response { get; set; }
