@@ -1,1 +1,5 @@
-
+.nuget/
+RunAllBots/obj/
+RunAllBots/bin/
+packages/
+TestResults/
