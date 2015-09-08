@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RunAllBots;
 using RedditBots;
 using RedditSharp.Things;
 
 namespace RedditBots {
     class BotKanMusus : AbstractBot {
 
-
-        public override String Run() {
+        public override string Run() {
             List<KanMususBot> bots = GetAllBots();
             retVal += "\r\nStarted: " + DateTime.Now;
             retVal += "\r\nNumber of KanMusu bots running: " + bots.Count;
@@ -43,43 +41,36 @@ namespace RedditBots {
                 if (CheckIfPostSaved(post.Id)) {
                     continue;
                 }
-                //Increment the counter
+
                 newPostsCount++;
                 //Console.WriteLine("Scanning a new post...");
-                string[] tags;
+                List<string> tags;
                 string pixivId = GetPixivIdFromComments(post);
                 tags = GetImageTagsByPixivId(pixivId);
                 if (pixivId == null || tags.Count() < 1) {
                     pixivId = GetImageSourceId(post.Url.ToString());
                     tags = GetImageTagsByPixivId(pixivId);
+
+                    //Fallback on -booru tags
+                    if (tags.Count() < 1) {
+                        tags = getBooruTags(post.Url.ToString()).ToList();
+                    }
                 }
 
                 //Compares tags in all posts to the tags in all bots
                 foreach (KanMususBot bot in bots) {
                     Boolean comment = false;
 
-                    /*comment = from bt in bot.Tags
-                               from pt in tags
-                               where bt.Contains(pt)
-                               select true; */
-                    //replaces the old method of checking if posts should be commented on
-                    comment = bot.Tags.Any(bt => tags.Any(t => bt.Contains(t)));
+                    comment = bot.Tags.Any(bt => tags.Any(t => bt == t));
                     if (post.LinkFlairText == null) {
                         post.LinkFlairText = "";
                     }
                     if (!comment) {
                         comment = bot.Subreddits.Any(s => bot.Tags.Any(t => s.SearchTitleFlair && (post.Title.Contains(t) || post.LinkFlairText.Contains(t))));
                     }
-                    //Adds posts from subreddits that are allowed to search title or flair
-                    /*bot.Posts.AddRange((from sr in bot.Subreddits
-                                        from bt in bot.Tags
-                                        let p = post
-                                        where sr.SearchTitleFlair && (p.Title.Contains(bt) || p.LinkFlairText.Contains(bt))
-                                        select p).ToList()); */
-                    //Removes duplicates. This is probably pretty slow, but I don't care
-                    //bot.Posts = bot.Posts.Distinct().ToList();
+
                     
-                    //Loop through all the posts that were just added, save them and then comment on them
+                    //Comment on post if it should be commented on
                     if(comment) {
                         user = reddit.LogIn(bot.username, bot.password);
                         string message = "Bot " + bot.username + " commented on [" + post.Title + "](" + post.Shortlink + ")";
@@ -103,6 +94,7 @@ namespace RedditBots {
             Random rnd = new Random();
             int rInt = rnd.Next(0, bot.Replies.Length);
             string comment = bot.Replies[rInt];
+            
             post.Comment(bot.Replies[rInt]);
         }
 
