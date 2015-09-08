@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using Polenter.Serialization;
 using RedditSharp;
 using RedditSharp.Things;
-using RunAllBots;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -35,9 +34,14 @@ namespace RedditBots {
         /// </summary>
         public override string Run() {
 
+            //Temporary
+            FindSeries("http://www.reddit.com/r/pantsu/comments/3af4v1/dogs_love_the_water_original/");
+            return "";
+
             //TODO: Add scanned images to a database so they aren't scanned again.
 
-            user = reddit.LogIn("AutoTagBot", "11noah");
+            user = reddit.LogIn("AutoTagBot", "PASSWORD"); //remember to change the password or it won't work
+
             retVal = "";
             List<Post> untaggedPosts = GetUntaggedRedditPosts(user);
 
@@ -62,13 +66,22 @@ namespace RedditBots {
             return retVal;
         }
 
+        private void FindSeries(string postUrl) {
+            Uri uri = new Uri(postUrl); // I'm too lazy to look up how this actually is supposed to work.
+            var post = reddit.GetPost(uri);
+
+            string title = GetImageTitleTag(post.Url.ToString());
+            Console.Write("The image appears to be from " + title);
+            Console.Read();
+        }
+
         /// <summary>
         /// Returns the title of the anime an image is from.
         /// </summary>
         /// <param name="URL"></param>
         /// <returns></returns>
         public string GetImageTitleTag(string URL) {
-            string[] tags = null;
+            List<string> tags = null;
             //Gets the pixiv source ID using SauceNAO
             string pixivId = GetImageSourceId(URL);
             if (pixivId != null) {
