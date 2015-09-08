@@ -6,7 +6,35 @@
         <xs:element maxOccurs="unbounded" name="Bot">
           <xs:complexType>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" name="Tag" type="xs:string" />
+              <xs:element name="Subreddits">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Subreddit">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="SearchTitleFlair" type="xs:boolean" use="required" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Tags">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Tag" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Replies">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="Reply" type="xs:string" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
             <xs:attribute name="username" type="xs:string" use="required" />
             <xs:attribute name="password" type="xs:string" use="required" />
