@@ -38,6 +38,7 @@ namespace RedditBots {
             reddit = new Reddit();
 
             //Establish a connection to the database
+            //I don't think I can use "using" because this connection needs to remain open for the lifetime of the program
             try {
                 dbConnection = (IDbConnection)new SqliteConnection("Data Source=BotData.db,Version=3");
                 dbConnection.Open();
@@ -65,13 +66,20 @@ namespace RedditBots {
         protected void SavePost(int botId, string botName, string postID) {
             string sql = "REPLACE INTO BotData (botId, botName, postID) VALUES(" + botId + ", \"" + botName + "\", \"" + postID + "\")";
 
-            IDbCommand dbcmd = dbConnection.CreateCommand();
+            /*IDbCommand dbcmd = dbConnection.CreateCommand();
             dbcmd.CommandText = sql;
-            dbcmd.ExecuteNonQuery();
+            dbcmd.ExecuteNonQuery();*/
 
             //Perform cleanup
-            dbcmd.Dispose();
-            dbcmd = null;
+            //dbcmd.Dispose();
+            //dbcmd = null;
+
+            //Adapted to use "using"
+            using (IDbCommand dbcmd = dbConnection.CreateCommand())
+            {
+                dbcmd.CommandText = sql;
+                dbcmd.ExecuteNonQuery();
+            }
         }
 
         /// <summary>
@@ -234,6 +242,7 @@ namespace RedditBots {
                 StreamReader reader = new StreamReader(stream, Encoding.UTF8);
                 jsonOutput = reader.ReadToEnd();
             } catch (WebException) {
+                retVal += "\r\nUnable to retrieve Pixiv tags from ID " + id;
                 return new List<string>();
             }
 
@@ -264,7 +273,6 @@ namespace RedditBots {
 
             using (StreamWriter stOut = new StreamWriter(req.GetRequestStream(), System.Text.Encoding.UTF8)) {
                 stOut.Write(parameters);
-                stOut.Close();
             }
 
             HttpWebResponse res = (HttpWebResponse)req.GetResponse();
