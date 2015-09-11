@@ -94,7 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractBot.cs" />
+    <Compile Include="AniDB.cs" />
     <Compile Include="Bots\OneTrueKongouBot.cs" />
+    <Compile Include="Bots\WhichMoeBot.cs" />
     <Compile Include="Models\AniDB.cs" />
     <Compile Include="Bots\AutoTagBot.cs" />
     <Compile Include="Bots\BotKanMusus.cs" />
