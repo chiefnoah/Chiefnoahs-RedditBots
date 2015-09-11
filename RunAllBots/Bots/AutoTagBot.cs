@@ -191,15 +191,7 @@ namespace RedditBots {
                             fstrmDecompressedFile.Write(buffer, 0, numRead);
                             fstrmDecompressedFile.Flush();
                             numRead = strmUncompress.Read(buffer, 0, buffer.Length);
-                        } // Whend
-
-                        //int numRead = 0;
-
-                        //while ((numRead = strmUncompress.Read(buffer, 0, buffer.Length)) != 0)
-                        //{
-                        //    fstrmDecompressedFile.Write(buffer, 0, numRead);
-                        //    fstrmDecompressedFile.Flush();
-                        //} // Whend
+                        }
 
                         strmUncompress.Close();
                     } // End Using System.IO.Compression.GZipStream strmUncompress 
