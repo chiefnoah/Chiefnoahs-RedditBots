@@ -180,8 +180,7 @@ namespace RedditBots {
         public static void DeCompressFile(string CompressedFile, string DeCompressedFile) {
             byte[] buffer = new byte[1024 * 1024];
 
-            using (System.IO.FileStream fstrmCompressedFile = System.IO.File.OpenRead(CompressedFile)) // fi.OpenRead())
-    {
+            using (System.IO.FileStream fstrmCompressedFile = System.IO.File.OpenRead(CompressedFile)) {
                 using (System.IO.FileStream fstrmDecompressedFile = System.IO.File.Create(DeCompressedFile)) {
                     using (System.IO.Compression.GZipStream strmUncompress = new System.IO.Compression.GZipStream(fstrmCompressedFile,
                             System.IO.Compression.CompressionMode.Decompress)) {
