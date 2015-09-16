@@ -7,7 +7,7 @@ using RedditBots;
 using RedditSharp.Things;
 
 namespace RedditBots {
-    class BotKanMusus : AbstractBot {
+    public class BotKanMusus : AbstractBot {
 
         public override string Run() {
             List<KanMususBot> bots = GetAllBots();
@@ -127,11 +127,7 @@ namespace RedditBots {
         /// <returns></returns>
         public List<KanMususBot> GetAllBots() {
             try {
-                System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(KanMusus));
-                String filepath = "./Bots/Data/KanMususData.xml";
-                System.IO.StreamReader file = new System.IO.StreamReader(filepath);
-                KanMusus kanmusus = new KanMusus();
-                kanmusus = (KanMusus)reader.Deserialize(file);
+                KanMusus kanmusus = LoadConfig<KanMusus>("KanMususData.xml");
                 List<KanMususBot> allBots = kanmusus.Bot.ToList<KanMususBot>();
                 List<KanMususBot> enabledBots =
                     (from bot in allBots
@@ -139,8 +135,8 @@ namespace RedditBots {
                      select bot).ToList<KanMususBot>();
                 return enabledBots;
             } catch (Exception e) {
+                retVal += "\r\nUnable to load bot settings from config";
                 Console.Write(e.Message);
-                Console.Read();
                 return null;
             }
         }
