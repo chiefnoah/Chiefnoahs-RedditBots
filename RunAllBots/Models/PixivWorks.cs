@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RedditBots {
-    class PixivWorksResponse {
+    public class PixivWorksResponse {
         
 public string status { get; set; }
 public Response[] response { get; set; }

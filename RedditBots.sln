@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{55C32E
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditBotsTests1", "RedditBotsTests1\RedditBotsTests1.csproj", "{68892E9B-EBBC-4579-9425-228CE4F2F780}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditBotsTests", "RedditBotsTests1\RedditBotsTests.csproj", "{68892E9B-EBBC-4579-9425-228CE4F2F780}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

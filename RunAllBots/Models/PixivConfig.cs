@@ -8,8 +8,8 @@ namespace RedditBots {
 
     /// <remarks/>
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
-    public partial class User {
+    [System.Xml.Serialization.XmlRootAttribute(ElementName = "User", Namespace = "", IsNullable = false)]
+    public partial class PixivUser {
 
         private string usernameField;
 
