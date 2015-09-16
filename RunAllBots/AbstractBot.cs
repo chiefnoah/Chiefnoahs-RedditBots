@@ -16,37 +16,36 @@ using Newtonsoft.Json;
 using System.Collections.Specialized;
 
 namespace RedditBots {
-    abstract public class AbstractBot {
+
+    public abstract class AbstractBot : AbstractHandler {
 
         protected const string BOT_ADMIN = "chiefnoah";
 
-        protected string retVal;
+
         protected Reddit reddit;
         protected AuthenticatedUser user;
 
         protected const string IQDB = "http://iqdb.org/";
-        protected const string PixivBaseUrl = "http://spapi.pixiv.net/iphone/illust.php";
-        protected const string PixivPAPIBaseUrl = "https://public-api.secure.pixiv.net/v1";
-        protected const string SauceNAOBaseUrl = "http://saucenao.com/search.php";
-        protected const string SauceNAOAPIKey = "07c14d9e56055d3f9119b4fba0cef10b42824057";
-        protected const string PixivClientID = "bYGKuGVw91e0NMfPGp44euvGt59s";
-        protected const string PixivClientSecret = "HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK";
+        protected const string PIXIV_BASE_URL = "https://public-api.secure.pixiv.net/v1";
+        protected const string SAUCE_NAO_BASE_URL = "http://saucenao.com/search.php";
+        protected const string SAUCE_NAO_API_KEY = "07c14d9e56055d3f9119b4fba0cef10b42824057";
+        protected const string PIXIV_CLIENT_ID = "bYGKuGVw91e0NMfPGp44euvGt59s";
+        protected const string PIXIV_CLIENT_SECRET = "HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK";
 
-        IDbConnection dbConnection;
+        //Handlers
+        AniDBHandler anidbHandler;
+        DanbooruHandler danbooruHandler;
+        IQDBHandler iqdbHandler;
+        MyAnimeListHandler myanimelistHandler;
+        PixivHandler pixivHandler;
+        SauceNAOHandler saucenaoHandler;
+
+        DatabaseHandler databaseHandler;
 
         public AbstractBot() {
             reddit = new Reddit();
 
-            //Establish a connection to the database
-            //I don't think I can use "using" because this connection needs to remain open for the lifetime of the program
-            try {
-                dbConnection = (IDbConnection)new SqliteConnection("Data Source=BotData.db,Version=3");
-                dbConnection.Open();
-                InitializeDatabase();
-            } catch (SqliteException e) {
-                //We've encountered a sqlite error. We want to fail out because this should break the program.
-                throw e;
-            }
+            databaseHandler = new DatabaseHandler();
             //TODO: find a way to gaurantee the database connection gets closed
         }
 
@@ -56,7 +55,6 @@ namespace RedditBots {
         /// <returns>Formatted string for logging</returns>
         abstract public string Run();
 
-
         /// <summary>
         /// Saves a post into a database.
         /// </summary>
@@ -65,21 +63,7 @@ namespace RedditBots {
         /// <param name="postID">ID (in base 36) of a Reddit post.</param>
         protected void SavePost(int botId, string botName, string postID) {
             string sql = "REPLACE INTO BotData (botId, botName, postID) VALUES(" + botId + ", \"" + botName + "\", \"" + postID + "\")";
-
-            /*IDbCommand dbcmd = dbConnection.CreateCommand();
-            dbcmd.CommandText = sql;
-            dbcmd.ExecuteNonQuery();*/
-
-            //Perform cleanup
-            //dbcmd.Dispose();
-            //dbcmd = null;
-
-            //Adapted to use "using"
-            using (IDbCommand dbcmd = dbConnection.CreateCommand())
-            {
-                dbcmd.CommandText = sql;
-                dbcmd.ExecuteNonQuery();
-            }
+            databaseHandler.ExecuteSQLNonQuery(sql);
         }
 
         /// <summary>
@@ -91,30 +75,15 @@ namespace RedditBots {
         protected Boolean CheckIfPostSaved(int botID, string postID) {
             string sql = "SELECT EXISTS(SELECT * FROM BotData WHERE botId=" + botID + " AND postId =\"" + postID + "\");";
 
-            IDbCommand dbcmd = dbConnection.CreateCommand();
-            dbcmd.CommandText = sql;
-            IDataReader reader = dbcmd.ExecuteReader();
-
-            //We don't actually want to read the results, we just want to check if the object exists
-            while (reader.Read()) {
-                bool exists = reader.GetBoolean(0);
-                if (exists) {
-                    reader.Close();
-                    reader = null;
-                    dbcmd.Dispose();
-                    dbcmd = null;
-
-                    return true;
+            using (SqliteDataReader reader = databaseHandler.ExecuteSQLQuery(sql)) {
+                //We don't actually want to read the results, we just want to check if the object exists
+                while (reader.Read()) {
+                    bool exists = reader.GetBoolean(0);
+                    if (exists) {
+                        return true;
+                    }
                 }
-
             }
-
-            //Perform cleanup
-            reader.Close();
-            reader = null;
-            dbcmd.Dispose();
-            dbcmd = null;
-
             return false;
         }
 
@@ -127,46 +96,17 @@ namespace RedditBots {
         protected Boolean CheckIfPostSaved(string postID) {
             string sql = "SELECT EXISTS(SELECT * FROM BotData WHERE postId =\"" + postID + "\");";
 
-            IDbCommand dbcmd = dbConnection.CreateCommand();
-            dbcmd.CommandText = sql;
-            IDataReader reader = dbcmd.ExecuteReader();
+            using (SqliteDataReader reader = databaseHandler.ExecuteSQLQuery(sql)) {
+                //We don't actually want to read the results, we just want to check if the object exists
+                while (reader.Read()) {
+                    bool exists = reader.GetBoolean(0);
+                    if (exists) {
+                        return true;
+                    }
 
-            //We don't actually want to read the results, we just want to check if the object exists
-            while (reader.Read()) {
-                bool exists = reader.GetBoolean(0);
-                if (exists) {
-                    reader.Close();
-                    reader = null;
-                    dbcmd.Dispose();
-                    dbcmd = null;
-
-                    return true;
                 }
-                //TODO: use "using" to handle cleanup. I'm used to Java semantics. Don't hate!
             }
-
-            //Perform cleanup
-            reader.Close();
-            reader = null;
-            dbcmd.Dispose();
-            dbcmd = null;
-
             return false;
-        }
-
-        /// <summary>
-        /// Initializes the database.
-        /// </summary>
-        private void InitializeDatabase() {
-            string sql = "CREATE TABLE IF NOT EXISTS BotData (id INTEGER PRIMARY KEY AUTOINCREMENT, botId INT, botName TEXT, postID TEXT)";
-
-            IDbCommand dbcmd = dbConnection.CreateCommand();
-            dbcmd.CommandText = sql;
-            dbcmd.ExecuteNonQuery();
-
-            //Perform cleanup
-            dbcmd.Dispose();
-            dbcmd = null;
         }
 
 
@@ -197,11 +137,12 @@ namespace RedditBots {
         /// <returns>ID</returns>
         protected string GetImageSourceId(string imageUrl) {
             try {
-                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(SauceNAOBaseUrl + "?url=" + imageUrl + "&api_key=" + SauceNAOAPIKey + "&output_type=2");
+                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(SAUCE_NAO_BASE_URL + "?url=" + imageUrl + "&api_key=" + SAUCE_NAO_API_KEY + "&output_type=2");
                 HttpWebResponse res = (HttpWebResponse)req.GetResponse();
                 Stream str = res.GetResponseStream();
                 StreamReader strr = new StreamReader(str, Encoding.UTF8);
                 string jsonStr = strr.ReadToEnd();
+                strr.Close();
                 JObject o = JObject.Parse(jsonStr);
                 Single similarity = float.Parse((string)o["results"][0]["header"]["similarity"], CultureInfo.InvariantCulture);
                 if (similarity > 60f) {
@@ -227,7 +168,7 @@ namespace RedditBots {
             if (id == null) {
                 return new List<string>();
             }
-            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(PixivPAPIBaseUrl + "/works/" + id + ".json");
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(PIXIV_BASE_URL + "/works/" + id + ".json");
             req.Method = "GET";
             req.ContentType = "application/x-www-form-urlencoded";
 
@@ -263,13 +204,13 @@ namespace RedditBots {
             req.Referer = "http://pixiv.net";
 
 
-            System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(User));
+            System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(PixivUser));
             string filepath = "./Bots/Data/PixivAuthentication.xml";
             System.IO.StreamReader file = new System.IO.StreamReader(filepath);
-            User user = new User();
-            user = (User)reader.Deserialize(file);
+            PixivUser user = new PixivUser();
+            user = (PixivUser)reader.Deserialize(file);
 
-            string parameters = "&username=" + user.Username + "&password=" + user.Password + "&grant_type=password&client_id=" + PixivClientID + "&client_secret=" + PixivClientSecret;
+            string parameters = "&username=" + user.Username + "&password=" + user.Password + "&grant_type=password&client_id=" + PIXIV_CLIENT_ID + "&client_secret=" + PIXIV_CLIENT_SECRET;
 
             using (StreamWriter stOut = new StreamWriter(req.GetRequestStream(), System.Text.Encoding.UTF8)) {
                 stOut.Write(parameters);
