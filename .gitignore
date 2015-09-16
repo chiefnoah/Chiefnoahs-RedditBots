@@ -5,4 +5,4 @@ packages/
 TestResults/
 RedditBotsTests1/obj/
 RedditBotsTests1/bin/
-RunAllBots/Bots/Data/KanMususData.xml
+RedditBots/Bots/Data/*
