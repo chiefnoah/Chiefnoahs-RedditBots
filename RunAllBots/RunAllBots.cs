@@ -18,7 +18,7 @@ namespace RedditBots {
                 WriteLog(output);
             } catch (Exception e) {
                 //Generic exception because we want to know exactly what caused the program to crash
-                WriteLog("\r\n\r\nERROR: " + e.Message);
+                WriteLog("\r\n\r\nERROR: " + e.Message + "\r\nStacktrac: " + e.StackTrace);
             }
 
         }
