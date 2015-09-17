@@ -4,6 +4,7 @@ using RedditSharp;
 using RedditSharp.Things;
 using Mono.Data.Sqlite;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace RedditBots {
 
@@ -99,6 +100,44 @@ namespace RedditBots {
                 }
             }
             return false;
+        }
+
+        public bool CheckIfCommentChecked(RedditSharp.Things.Comment comment, int botId) {
+            return CheckIfCommentChecked(comment.Id, botId);
+        }
+
+        public bool CheckIfCommentChecked(string commentId, int botId) {
+            string sql = "SELECT EXISTS(SELECT id FROM CheckedComments WHERE botId = \"" + botId + "\" AND commentId = \"" + commentId + "\")";
+
+            using (SqliteDataReader reader = databaseHandler.ExecuteSQLQuery(sql)) {
+                while (reader.Read()) {
+                    bool exists = reader.GetBoolean(0);
+                    if(exists) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public List<Comment> GetRecentComments(IEnumerable<RedditSharp.Things.Subreddit> subreddits, int count) {
+            List<Comment> allComments = new List<Comment>();
+
+            foreach (Subreddit s in subreddits) {
+                allComments.AddRange(s.Comments.Take(count));
+            }
+            return allComments;
+        }
+
+        public List<RedditSharp.Things.Comment> GetRecentComments(string[] subs, int count) {
+
+            List<Subreddit> subredditsList = new List<Subreddit>();
+            foreach (string s in subs) {
+                subredditsList.Add(reddit.GetSubreddit(s));
+            }
+
+
+            return GetRecentComments(subredditsList, count);
         }
 
 
