@@ -102,7 +102,6 @@
     <Compile Include="Handlers\DatabaseHandler.cs" />
     <Compile Include="Handlers\IQDBHandler.cs" />
     <Compile Include="Models\AniDB.cs" />
-    <Compile Include="Bots\AutoTagBot.cs" />
     <Compile Include="Bots\BotKanMusus.cs" />
     <Compile Include="Models\DanbooruPost.cs" />
     <Compile Include="Models\KanMusuBotData.cs" />
