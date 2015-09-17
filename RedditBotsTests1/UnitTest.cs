@@ -86,6 +86,12 @@ namespace RedditBotsTests1 {
         }
 
         [TestMethod]
+        public void BotSaveCheckPostTest() {
+            TestBot bot = new TestBot();
+            Assert.IsTrue(bot.SaveCheckPostTest());
+        }
+
+        [TestMethod]
         public void MiscTest() {
         }
     }
@@ -94,6 +100,10 @@ namespace RedditBotsTests1 {
     class TestBot : AbstractBot {
         public override string Run() {
             throw new NotImplementedException();
+        }
+        public Boolean SaveCheckPostTest() {
+            SavePost(0, "testBot", "test");
+            return CheckIfPostSaved(0, "test"); 
         }
     }
 }
