@@ -40,11 +40,15 @@ namespace RedditBots {
         }
 
         private DanbooruPost getPost(string json) {
-            try {
-                DanbooruPost post = JsonConvert.DeserializeObject<DanbooruPost>(json);
-                return post;
-            } catch (InvalidOperationException) {
-                //This means we didn't get the right JSON data back
+            if (json != null && json != "") {
+                try {
+                    DanbooruPost post = JsonConvert.DeserializeObject<DanbooruPost>(json);
+                    return post;
+                } catch (InvalidOperationException) {
+                    //This means we didn't get the right JSON data back
+                    return null;
+                }
+            } else {
                 return null;
             }
         }
