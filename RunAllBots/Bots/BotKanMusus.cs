@@ -76,8 +76,8 @@ namespace RedditBots {
                     if (comment) {
                         user = reddit.LogIn(bot.username, bot.password);
                         string message = "Bot " + bot.username + " commented on [" + post.Title + "](" + post.Shortlink + ")";
-                        CommentOnPost(bot, post);
-                        SendMessageToAdmin(bot.id, bot.username, bot.password, BOT_ADMIN, message);
+                        //CommentOnPost(bot, post);
+                        //SendMessageToAdmin(bot.id, bot.username, bot.password, BOT_ADMIN, message);
                         retVal += "\r\nBot " + bot.username + " commented on " + post.Title + " - " + post.Shortlink;
                     }
                     SavePost(bot.id, bot.username, post.Id);
@@ -107,7 +107,10 @@ namespace RedditBots {
                 //If we have no tags at this point, try using danbooru
                 if (tags.Count < 1) {
                     int danbooruId = iqdbHandler.GetDanbooruId(post.Url.ToString());
-                    tags = ((danbooruHandler.getPost(danbooruId).tag_string_character).Split(new char[0])).ToList();
+                    //make sure our Id isn't borked
+                    if (danbooruId > 0) {
+                        tags = ((danbooruHandler.getPost(danbooruId).tag_string_character).Split(new char[0])).ToList();
+                    }
                     if (tags != null) {
                         if (tags.Count > 0) {
                             return tags;
@@ -116,6 +119,7 @@ namespace RedditBots {
                 }
             }
             //If we can't get tags, return an empty list
+            retVal += "\r\nCould not find any tags for " + post.Url;
             return new List<string>();
         }
 
