@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Web;
 using RedditSharp;
 using RedditSharp.Things;
-using System.Net;
-using System.IO;
-using Newtonsoft.Json.Linq;
-using System.Globalization;
 using Mono.Data.Sqlite;
-using System.Data;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using System.Collections.Specialized;
 
 namespace RedditBots {
 
