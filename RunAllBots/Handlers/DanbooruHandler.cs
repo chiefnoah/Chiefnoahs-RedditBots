@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace RedditBots {
     public class DanbooruHandler : AbstractHandler{
@@ -49,6 +51,33 @@ namespace RedditBots {
 
         public DanbooruPost getPost(int id) {
             return getPost(GetPostJsonFromId(id));
+        }
+
+        public static string ParseName(string tag) {
+            List<string> name = new List<string>();
+            string[] parts = tag.Split('_');
+            foreach (string word in parts) {
+                //If the word contains a opening parenthesis, it means that word is the start of the title of the show the caracter is from.
+                //Break the loop. Everything after that will be part of the show title
+                if (word.Contains("(")) break;
+                //Don't capitalize words like "the" and "a"
+                switch(word) {
+                    case "the":
+                    case "a":
+                    case "of":
+                    case "an":
+                    case "to":
+                    case "from":
+                    case "by":
+                    case "on":
+                        name.Add(word);
+                        break;
+                    default:
+                        name.Add(word[0].ToString().ToUpper() + word.Substring(1)); //Capitalizes the first letter because it's (hopefully) part of a name
+                        break;
+                }
+            }
+            return String.Join(" ", name);
         }
     }
 }
