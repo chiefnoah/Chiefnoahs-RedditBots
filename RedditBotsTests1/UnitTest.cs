@@ -10,6 +10,7 @@ namespace RedditBotsTests1 {
         [TestMethod]
         public void AniDBTagSearchTest() {
             RedditBots.AniDBHandler anidb = new RedditBots.AniDBHandler();
+            anidb.AddXMLToDB();
             List<RedditBots.animetitlesAnime> anime = anidb.SearchTitle("東方");
             Assert.IsTrue(anime.Count >= 3);
         }
@@ -21,6 +22,7 @@ namespace RedditBotsTests1 {
             tags.Add("KanColle");
 
             AniDBHandler anidb = new AniDBHandler();
+            anidb.AddXMLToDB();
             List<animetitlesAnime> anime = anidb.SearchTitleList(tags);
             Assert.IsTrue(anime.Count > 0);
         }
