@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace RedditBots {
 
+
     /// <remarks/>
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
@@ -14,6 +15,10 @@ namespace RedditBots {
         private WhichMoeConfigSubreddit[] subredditsField;
 
         private WhichMoeConfigSummon[] summonsField;
+
+        private WhichMoeConfigAccount accountField;
+
+        private byte idField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlArrayItemAttribute("subreddit", IsNullable = false)]
@@ -34,6 +39,27 @@ namespace RedditBots {
             }
             set {
                 this.summonsField = value;
+            }
+        }
+
+        /// <remarks/>
+        public WhichMoeConfigAccount Account {
+            get {
+                return this.accountField;
+            }
+            set {
+                this.accountField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public byte id {
+            get {
+                return this.idField;
+            }
+            set {
+                this.idField = value;
             }
         }
     }
@@ -112,6 +138,38 @@ namespace RedditBots {
             }
         }
     }
+
+    /// <remarks/>
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    public partial class WhichMoeConfigAccount {
+
+        private string usernameField;
+
+        private string passwordField;
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string username {
+            get {
+                return this.usernameField;
+            }
+            set {
+                this.usernameField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.XmlAttributeAttribute()]
+        public string password {
+            get {
+                return this.passwordField;
+            }
+            set {
+                this.passwordField = value;
+            }
+        }
+    }
+
 
 
 }
