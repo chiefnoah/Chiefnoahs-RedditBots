@@ -76,8 +76,8 @@ namespace RedditBots {
                     if (comment) {
                         user = reddit.LogIn(bot.username, bot.password);
                         string message = "Bot " + bot.username + " commented on [" + post.Title + "](" + post.Shortlink + ")";
-                        //CommentOnPost(bot, post);
-                        //SendMessageToAdmin(bot.id, bot.username, bot.password, BOT_ADMIN, message);
+                        CommentOnPost(bot, post);
+                        SendMessageToAdmin(bot.id, bot.username, bot.password, BOT_ADMIN, message);
                         retVal += "\r\nBot " + bot.username + " commented on " + post.Title + " - " + post.Shortlink;
                     }
                     SavePost(bot.id, bot.username, post.Id);
