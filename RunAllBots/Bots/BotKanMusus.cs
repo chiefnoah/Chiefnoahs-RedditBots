@@ -87,29 +87,31 @@ namespace RedditBots {
         }
 
         public List<string> TryToGetTags(Post post) {
-            List<string> tags = new List<string>();
-            //Try to get the Pixiv ID from the "source" comment on the post
-            int pixivId = GetPixivIdFromComments(post);
-            //If unable to get Pixiv ID from comment, use SauceNAO
-            if (pixivId < 1) {
-                pixivId = saucenaoHandler.GetPixivIdFromUrl(post.Url.ToString());
-            }
-
-            //If we have a Pixiv ID at this point, we can query the tags for them.
-            if (pixivId > 1) {
-                PixivWorksResponse.Response pixivWork = pixivHandler.GetPixivWork(pixivId);
-                if (pixivWork != null) {
-                    tags = pixivWork.tags.ToList();
-                    return tags;
+            if (post != null) {
+                List<string> tags = new List<string>();
+                //Try to get the Pixiv ID from the "source" comment on the post
+                int pixivId = GetPixivIdFromComments(post);
+                //If unable to get Pixiv ID from comment, use SauceNAO
+                if (pixivId < 1) {
+                    pixivId = saucenaoHandler.GetPixivIdFromUrl(post.Url.ToString());
                 }
-            }
-            //If we have no tags at this point, try using danbooru
-            if (tags.Count < 1) {
-                int danbooruId = iqdbHandler.GetDanbooruId(post.Url.ToString());
-                tags = ((danbooruHandler.getPost(danbooruId).tag_string_character).Split(new char[0])).ToList();
-                if (tags != null) {
-                    if (tags.Count > 0) {
+
+                //If we have a Pixiv ID at this point, we can query the tags for them.
+                if (pixivId > 1) {
+                    PixivWorksResponse.Response pixivWork = pixivHandler.GetPixivWork(pixivId);
+                    if (pixivWork != null) {
+                        tags = pixivWork.tags.ToList();
                         return tags;
+                    }
+                }
+                //If we have no tags at this point, try using danbooru
+                if (tags.Count < 1) {
+                    int danbooruId = iqdbHandler.GetDanbooruId(post.Url.ToString());
+                    tags = ((danbooruHandler.getPost(danbooruId).tag_string_character).Split(new char[0])).ToList();
+                    if (tags != null) {
+                        if (tags.Count > 0) {
+                            return tags;
+                        }
                     }
                 }
             }
@@ -131,6 +133,7 @@ namespace RedditBots {
             post.Comment(bot.Replies[rInt]);
         }
 
+        //TODO: Move this to AbstractBot and add overloads
         /// <summary>
         /// Returns the 10 latest posts from all subreddits passed as an argument
         /// </summary>
