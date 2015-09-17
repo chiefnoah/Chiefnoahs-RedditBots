@@ -90,10 +90,6 @@ namespace RedditBotsTests1 {
             TestBot bot = new TestBot();
             Assert.IsTrue(bot.SaveCheckPostTest());
         }
-
-        [TestMethod]
-        public void MiscTest() {
-        }
     }
 
     [TestClass]

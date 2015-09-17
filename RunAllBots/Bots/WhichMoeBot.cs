@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RedditSharp;
 
 namespace RedditBots
 {
@@ -10,6 +11,18 @@ namespace RedditBots
     {
 
         public const string VERSION = "1.0.0";
+        private const string CONFIG_FILENAME = "WhichMoeConfig.xml";
+
+        AniDBHandler anidbHander;
+        DanbooruHandler danbooruHandler;
+        IQDBHandler iqdbHandler;
+        MyAnimeListHandler myanimelistHandler;
+        PixivHandler pixivHandler;
+        SauceNAOHandler saucenaoHandler;
+
+        DatabaseHandler databaseHandler;
+
+        WhichMoeConfig config;
 
         /* TODO list:
            * Copy AniDB database handling code over from AutoTagBot
@@ -18,8 +31,21 @@ namespace RedditBots
            * Adapt XML settings loader from KanMususBot
            * Interface with -booru APIs instead of just using the IQDB tags */
 
+        public WhichMoeBot() {
+            databaseHandler = new DatabaseHandler();
+            anidbHander = new AniDBHandler(databaseHandler);
+            danbooruHandler = new DanbooruHandler();
+            iqdbHandler = new IQDBHandler();
+            myanimelistHandler = new MyAnimeListHandler();
+            pixivHandler = new PixivHandler();
+            saucenaoHandler = new SauceNAOHandler();
+
+            config = LoadConfig<WhichMoeConfig>(CONFIG_FILENAME);
+        }
+
         public override string Run()
         {
+            user = reddit.LogIn(config.Account.username, config.Account.password);
             /* TODO List:
                * Get 50 or so latest comments to all configured subs
                * Check DB if comment has already been checked
@@ -38,7 +64,10 @@ namespace RedditBots
             return retVal;
         }
 
-        
+
+
+
+
 
     }
 }
