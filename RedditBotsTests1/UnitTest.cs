@@ -72,6 +72,13 @@ namespace RedditBotsTests1 {
         }
 
         [TestMethod]
+        public void SauceNAOImageUrlFailTest() {
+            SauceNAOHandler saucenaoHandler = new SauceNAOHandler();
+            int id = saucenaoHandler.GetPixivIdFromUrl("https://cdn.awwni.me/r4m6.jpg");
+            Assert.AreEqual(-1, id);
+        }
+
+        [TestMethod]
         public void IQDBImageSearchTest() {
             IQDBHandler iqdbhandler = new IQDBHandler();
             int id = iqdbhandler.GetDanbooruId("https://cdn.awwni.me/r4dn.png");
