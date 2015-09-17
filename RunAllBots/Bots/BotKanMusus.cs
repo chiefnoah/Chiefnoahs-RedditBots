@@ -9,6 +9,18 @@ using RedditSharp.Things;
 namespace RedditBots {
     public class BotKanMusus : AbstractBot {
 
+        DanbooruHandler danbooruHandler;
+        PixivHandler pixivHandler;
+        SauceNAOHandler saucenaoHandler;
+        IQDBHandler iqdbHandler;
+
+        public BotKanMusus() {
+            danbooruHandler = new DanbooruHandler();
+            pixivHandler = new PixivHandler();
+            saucenaoHandler = new SauceNAOHandler();
+            iqdbHandler = new IQDBHandler();
+        }
+
         public override string Run() {
             List<KanMususBot> bots = GetAllBots();
             retVal += "\r\nStarted: " + DateTime.Now;
@@ -44,18 +56,8 @@ namespace RedditBots {
 
                 newPostsCount++;
                 //Console.WriteLine("Scanning a new post...");
-                List<string> tags;
-                string pixivId = GetPixivIdFromComments(post);
-                tags = GetImageTagsByPixivId(pixivId);
-                if (pixivId == null || tags.Count() < 1) {
-                    pixivId = GetImageSourceId(post.Url.ToString());
-                    tags = GetImageTagsByPixivId(pixivId);
+                List<string> tags = TryToGetTags(post);
 
-                    //Fallback on -booru tags
-                    if (tags.Count() < 1) {
-                        tags = getBooruTags(post.Url.ToString()).ToList();
-                    }
-                }
 
                 //Compares tags in all posts to the tags in all bots
                 foreach (KanMususBot bot in bots) {
@@ -69,9 +71,9 @@ namespace RedditBots {
                         comment = bot.Subreddits.Any(s => bot.Tags.Any(t => s.SearchTitleFlair && (post.Title.Contains(t) || post.LinkFlairText.Contains(t))));
                     }
 
-                    
+
                     //Comment on post if it should be commented on
-                    if(comment) {
+                    if (comment) {
                         user = reddit.LogIn(bot.username, bot.password);
                         string message = "Bot " + bot.username + " commented on [" + post.Title + "](" + post.Shortlink + ")";
                         CommentOnPost(bot, post);
@@ -84,6 +86,37 @@ namespace RedditBots {
             retVal += "\r\nScanned " + newPostsCount + "\r\n";
         }
 
+        public List<string> TryToGetTags(Post post) {
+            List<string> tags = new List<string>();
+            //Try to get the Pixiv ID from the "source" comment on the post
+            int pixivId = GetPixivIdFromComments(post);
+            //If unable to get Pixiv ID from comment, use SauceNAO
+            if (pixivId < 1) {
+                pixivId = saucenaoHandler.GetPixivIdFromUrl(post.Url.ToString());
+            }
+
+            //If we have a Pixiv ID at this point, we can query the tags for them.
+            if (pixivId > 1) {
+                PixivWorksResponse.Response pixivWork = pixivHandler.GetPixivWork(pixivId);
+                if (pixivWork != null) {
+                    tags = pixivWork.tags.ToList();
+                    return tags;
+                }
+            }
+            //If we have no tags at this point, try using danbooru
+            if (tags.Count < 1) {
+                int danbooruId = iqdbHandler.GetDanbooruId(post.Url.ToString());
+                tags = ((danbooruHandler.getPost(danbooruId).tag_string_character).Split(new char[0])).ToList();
+                if (tags != null) {
+                    if (tags.Count > 0) {
+                        return tags;
+                    }
+                }
+            }
+            //If we can't get tags, return an empty list
+            return new List<string>();
+        }
+
         /// <summary>
         /// Comments on the post with a random comment taken from the bot
         /// </summary>
@@ -94,7 +127,7 @@ namespace RedditBots {
             Random rnd = new Random();
             int rInt = rnd.Next(0, bot.Replies.Length);
             string comment = bot.Replies[rInt];
-            
+
             post.Comment(bot.Replies[rInt]);
         }
 
