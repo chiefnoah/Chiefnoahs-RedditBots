@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RedditBots;
 using System.Collections.Generic;
+using RedditSharp;
 
 namespace RedditBotsTests1 {
     [TestClass]
@@ -62,7 +63,7 @@ namespace RedditBotsTests1 {
         }
 
         [TestMethod]
-        public void TSauceNAOImageUrlSearchTest() {
+        public void SauceNAOImageUrlSearchTest() {
             SauceNAOHandler sauceNAOHandler = new SauceNAOHandler();
             int id = sauceNAOHandler.GetPixivIdFromUrl("https://cdn.awwni.me/qswe.jpg");
             Assert.AreEqual(48168636, id);
@@ -73,6 +74,15 @@ namespace RedditBotsTests1 {
             IQDBHandler iqdbhandler = new IQDBHandler();
             int id = iqdbhandler.GetDanbooruId("https://cdn.awwni.me/r4dn.png");
             Assert.AreEqual(1825390, id);
+        }
+
+        [TestMethod]
+        public void KanMusuBotTagParseTest() {
+            Reddit reddit = new Reddit();
+            RedditSharp.Things.Post post = reddit.GetPost(new Uri("https://www.reddit.com/r/awwnime/comments/3l8jem/just_a_little_remi_touhou/"));
+            BotKanMusus kanmus = new BotKanMusus();
+            List<string> tags = kanmus.TryToGetTags(post);
+            Assert.IsTrue(tags.Count > 0);
         }
 
         [TestMethod]
