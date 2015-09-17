@@ -33,7 +33,13 @@ namespace RedditBots {
                     SauceNAOResponse saucenaoResObject = JsonConvert.DeserializeObject<SauceNAOResponse>(jsonStr);
                     //Single similarity = float.Parse((string)o["results"][0]["header"]["similarity"], CultureInfo.InvariantCulture);
                     if (float.Parse(saucenaoResObject.results[0].header.similarity, CultureInfo.InvariantCulture) > 60f) {
-                        return Int32.Parse(saucenaoResObject.results[0].data.pixiv_id);
+                        try {
+                            return Int32.Parse(saucenaoResObject.results[0].data.pixiv_id);
+                        } catch (ArgumentNullException) {
+                            return -1;
+                        } catch (FormatException) {
+                            return -1
+                        }
                     }
                     retVal += "\r\nCould not find pixiv source for: " + url;
                 }
