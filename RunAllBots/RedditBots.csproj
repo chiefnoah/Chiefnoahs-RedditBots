@@ -112,6 +112,7 @@
     <Compile Include="Models\PixivAuthResponse.cs" />
     <Compile Include="Models\PixivWorks.cs" />
     <Compile Include="Models\SauceNAOConfig.cs" />
+    <Compile Include="Models\SauceNAOResponse.cs" />
     <Compile Include="Models\WhichMoeConfig.cs" />
     <Compile Include="Handlers\MyAnimeListHandler.cs" />
     <Compile Include="Handlers\PixivHandler.cs" />
