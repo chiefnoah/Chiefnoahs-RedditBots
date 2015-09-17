@@ -38,7 +38,7 @@ namespace RedditBots {
                         } catch (ArgumentNullException) {
                             return -1;
                         } catch (FormatException) {
-                            return -1
+                            return -1;
                         }
                     }
                     retVal += "\r\nCould not find pixiv source for: " + url;
