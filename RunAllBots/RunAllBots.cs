@@ -13,9 +13,14 @@ namespace RedditBots {
 
             BotKanMusus kanmusu = new BotKanMusus();
             OneTrueKongouBot oneTrueKongouBot = new OneTrueKongouBot();
+            try {
+                string output = kanmusu.Run() + oneTrueKongouBot.Run(); //lol this is the longest running part of the code
+                WriteLog(output);
+            } catch (Exception e) {
+                //Generic exception because we want to know exactly what caused the program to crash
+                WriteLog("\r\n\r\nERROR: " + e.Message);
+            }
 
-            string output = kanmusu.Run() + oneTrueKongouBot.Run(); //lol this is the longest running part of the code
-            WriteLog(output);
         }
 
         private static void WriteLog(string log)
