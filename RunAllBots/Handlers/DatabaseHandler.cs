@@ -19,7 +19,7 @@ namespace RedditBots {
         private void InitializeDatabase() {
             string sql = "CREATE TABLE IF NOT EXISTS BotData (id INTEGER PRIMARY KEY AUTOINCREMENT, botId INTEGER, botName TEXT, postID TEXT);";
             sql += "CREATE TABLE IF NOT EXISTS AnimeTitle (id INTEGER PRIMARY KEY AUTOINCREMENT, animeID INTEGER NOT NULL, type TEXT NOT NULL, language TEXT NOT NULL, title TEXT NOT NULL);";
-            sql += "CREATE TABLE IF NOT EXISTS CheckedComments (id INTEGER PRIMARY KEY AUTOINCREMENT, botId INTEGER, botName TEXT, commentID TEXT NOT NULL);";
+            sql += "CREATE TABLE IF NOT EXISTS CheckedComments (id INTEGER PRIMARY KEY AUTOINCREMENT, botId INTEGER, botName TEXT, commentId TEXT NOT NULL);";
 
             using (SqliteCommand command = connection.CreateCommand()) {
                 command.CommandText = sql;
