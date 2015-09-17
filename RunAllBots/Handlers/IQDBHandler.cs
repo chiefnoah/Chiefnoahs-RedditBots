@@ -53,8 +53,14 @@ namespace RedditBots {
             Regex reg = new Regex("(?<=http://danbooru.donmai.us/posts/)[\\d]+", RegexOptions.None);
             Match match = reg.Match(htmlPage);
             Group group = match.Groups[0];
-            int firstId = Int32.Parse(match.Value);
-            return firstId;
+            try {
+                int firstId = Int32.Parse(match.Value);
+                return firstId;
+            } catch (FormatException e) {
+                retVal += "\r\nUnable to parse danbooru ID from IQDB page";
+                return -1;
+            }
+
         }
 
         private string GetSearchPage(string url) {
