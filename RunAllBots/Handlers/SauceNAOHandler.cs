@@ -29,10 +29,11 @@ namespace RedditBots {
                 using (StreamReader strr = new StreamReader(str, Encoding.UTF8)) {
                     string jsonStr = strr.ReadToEnd();
                     strr.Close();
-                    JObject o = JObject.Parse(jsonStr);
-                    Single similarity = float.Parse((string)o["results"][0]["header"]["similarity"], CultureInfo.InvariantCulture);
-                    if (similarity > 60f) {
-                        return Int32.Parse((string)o["results"][0]["data"]["pixiv_id"]);
+                    //JObject o = JObject.Parse(jsonStr);
+                    SauceNAOResponse saucenaoResObject = JsonConvert.DeserializeObject<SauceNAOResponse>(jsonStr);
+                    //Single similarity = float.Parse((string)o["results"][0]["header"]["similarity"], CultureInfo.InvariantCulture);
+                    if (float.Parse(saucenaoResObject.results[0].header.similarity, CultureInfo.InvariantCulture) > 60f) {
+                        return Int32.Parse(saucenaoResObject.results[0].data.pixiv_id);
                     }
                     retVal += "\r\nCould not find pixiv source for: " + url;
                 }
