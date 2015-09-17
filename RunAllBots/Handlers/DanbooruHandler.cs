@@ -37,12 +37,18 @@ namespace RedditBots {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 return new StreamReader(response.GetResponseStream()).ReadToEnd();
             } catch (WebException e) {
-                throw e;
+                return null;
             }
         }
 
-        public DanbooruPost getPost(string json) {
-            return JsonConvert.DeserializeObject<DanbooruPost>(json);
+        private DanbooruPost getPost(string json) {
+            try {
+                DanbooruPost post = JsonConvert.DeserializeObject<DanbooruPost>(json);
+                return post;
+            } catch (InvalidOperationException) {
+                //This means we didn't get the right JSON data back
+                return null;
+            }
         }
 
         public DanbooruPost getPost(int id) {
