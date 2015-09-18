@@ -19,21 +19,21 @@ namespace RedditBots {
                 WriteLog(output);
             } catch (Exception e) {
                 //Generic exception because we want to know exactly what caused the program to crash
-                WriteLog("\r\n\r\nERROR: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
+                WriteLog("\r\n\r\nERROR with KanMususBot: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
             }
             try {
                 string output = oneTrueKongouBot.Run();
                 WriteLog(output);
             } catch (Exception e) {
                 //Generic exception because we want to know exactly what caused the program to crash
-                WriteLog("\r\n\r\nERROR: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
+                WriteLog("\r\n\r\nERROR with OneTrueKongouBot: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
             }
             try {
                 string output = whichMoeBot.Run();
                 WriteLog(output);
             } catch (Exception e) {
                 //Generic exception because we want to know exactly what caused the program to crash
-                WriteLog("\r\n\r\nERROR: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
+                WriteLog("\r\n\r\nERROR with WhichMoeBot: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
             }
 
         }
@@ -42,7 +42,7 @@ namespace RedditBots {
         {
             using (StreamWriter sw = File.AppendText("cron.log"))
             {
-                sw.WriteLine(log);
+                sw.WriteLine(DateTime.Now + " - " + log);
                 Console.Write(log);
             }
         }
