@@ -81,6 +81,17 @@ namespace RedditBots {
         }
 
         /// <summary>
+        /// Saves a comment into a database.
+        /// </summary>
+        /// <param name="botId">ID of the bot.</param>
+        /// <param name="botName">Name of the bot. This is usually the Reddit username of the bot.</param>
+        /// <param name="commentID">ID (in base 36) of a Reddit comment.</param>
+        protected void SaveComment(int botId, string botName, string commentID) {
+            string sql = "REPLACE INTO CheckedComments (botId, botName, postID) VALUES(" + botId + ", \"" + botName + "\", \"" + commentID + "\")";
+            databaseHandler.ExecuteSQLNonQuery(sql);
+        }
+
+        /// <summary>
         /// Returns whether the provided postID has been saved to table botname
         /// </summary>
         /// <param name="botID">ID of the bot</param>
