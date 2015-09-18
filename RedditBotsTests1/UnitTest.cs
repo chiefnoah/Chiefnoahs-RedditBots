@@ -18,8 +18,8 @@ namespace RedditBotsTests1 {
         [TestMethod]
         public void AniDBTagListSearchTest() {
             List<string> tags = new List<string>();
-            tags.Add("艦隊これくしょん");
-            tags.Add("KanColle");
+            tags.Add("Charlotte");
+            tags.Add("Charlotte (2015)");
 
             AniDBHandler anidb = new AniDBHandler();
             anidb.AddXMLToDB();
@@ -98,6 +98,12 @@ namespace RedditBotsTests1 {
         public void BotSaveCheckPostTest() {
             TestBot bot = new TestBot();
             Assert.IsTrue(bot.SaveCheckPostTest());
+        }
+
+        [TestMethod]
+        public void BotTestRun() {
+            WhichMoeBot testMoeBot = new WhichMoeBot();
+            testMoeBot.Run();
         }
 
     }
