@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RedditBots {
@@ -28,13 +29,14 @@ namespace RedditBots {
                 //Generic exception because we want to know exactly what caused the program to crash
                 WriteLog("\r\n\r\nERROR with OneTrueKongouBot: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
             }
-            /*try {
+            Thread.Sleep(60000); //Hopefully this will fix RedditSharp throwing Request errors. Sleeps for a minute
+            try {
                 string output = whichMoeBot.Run();
                 WriteLog(output);
             } catch (Exception e) {
                 //Generic exception because we want to know exactly what caused the program to crash
                 WriteLog("\r\n\r\nERROR with WhichMoeBot: " + e.Message + "\r\nStacktrace: " + e.StackTrace);
-            }*/
+            }
 
         }
 
