@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RedditSharp;
+using System.IO;
 
 namespace RedditBots {
     public class WhichMoeBot : AbstractBot {
@@ -22,6 +23,15 @@ namespace RedditBots {
         DatabaseHandler databaseHandler;
 
         WhichMoeConfig config;
+
+        public static void Main(string[] args) {
+            WhichMoeBot moeBot = new WhichMoeBot();
+            string log = moeBot.Run();
+            using (StreamWriter sw = File.AppendText("cron.log")) {
+                sw.WriteLine(DateTime.Now + " - " + log);
+                Console.Write(log);
+            }
+        }
 
         /* TODO list:
            * Copy AniDB database handling code over from AutoTagBot
@@ -229,8 +239,8 @@ namespace RedditBots {
         public bool CheckForSummon(string comment) {
             //
             bool summon = config.summons.Any(s => (comment.ToLower().Contains(s.Value.ToLower()) && s.enabled));
-            return true; //For testing. CHANGE THIS
-            //return summon;
+            //return true; //For testing. CHANGE THIS
+            return summon;
         }
 
 
