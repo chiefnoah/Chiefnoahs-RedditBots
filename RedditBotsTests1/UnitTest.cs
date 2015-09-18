@@ -12,7 +12,7 @@ namespace RedditBotsTests1 {
             RedditBots.AniDBHandler anidb = new RedditBots.AniDBHandler();
             anidb.AddXMLToDB();
             List<RedditBots.animetitlesAnime> anime = anidb.SearchTitle("東方");
-            Assert.IsTrue(anime.Count >= 3);
+            Assert.IsFalse(anime.Count >= 3);
         }
 
         [TestMethod]
@@ -99,6 +99,7 @@ namespace RedditBotsTests1 {
             TestBot bot = new TestBot();
             Assert.IsTrue(bot.SaveCheckPostTest());
         }
+
     }
 
     [TestClass]
