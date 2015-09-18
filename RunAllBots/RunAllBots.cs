@@ -15,7 +15,7 @@ namespace RedditBots {
             OneTrueKongouBot oneTrueKongouBot = new OneTrueKongouBot();
             WhichMoeBot whichMoeBot = new WhichMoeBot();
             try {
-                string output = kanmusu.Run() + oneTrueKongouBot.Run() + whichMoeBot(); //lol this is the longest running part of the code
+                string output = kanmusu.Run() + oneTrueKongouBot.Run() + whichMoeBot.Run(); //lol this is the longest running part of the code
                 WriteLog(output);
             } catch (Exception e) {
                 //Generic exception because we want to know exactly what caused the program to crash
