@@ -98,15 +98,15 @@ namespace RedditBots {
                             //Get a Pixiv Work response
                             pixivWork = pixivHandler.GetPixivWork(pixivId);
                         }
-
+                        bool original = false;
                         bool comesFromPixivAlbum = false;
-                        if(pixivWork != null) {
+                        if (pixivWork != null) {
                             comesFromPixivAlbum = pixivWork.page_count > 1;
+                            //Checks if any of the tags say "original" (including in japanese)
+                            //Defaults to false if it's an album, it's impossible to tell anything about the tags if it's an album :(
+                            //In this case, I consider danbooru tags to be more reliable so we'll check again after we load those
+                            original = (!comesFromPixivAlbum && pixivWork.tags.Any(t => (t == "オリジナル" || t == "original")));
                         }
-                        //Checks if any of the tags say "original" (including in japanese)
-                        //Defaults to false if it's an album, it's impossible to tell anything about the tags if it's an album :(
-                        //In this case, I consider danbooru tags to be more reliable so we'll check again after we load those
-                        bool original = (!comesFromPixivAlbum && pixivWork.tags.Any(t => (t == "オリジナル" || t == "original")));
 
                         //Try to get a danbooru ID from IQDB
                         int danbooruId = iqdbHandler.GetDanbooruId(p.Url.AbsoluteUri);
@@ -161,7 +161,7 @@ namespace RedditBots {
                             characters.Add(DanbooruHandler.ParseName(cs));
                         }
                         //Checks if we actually have any info about the post
-                        bool haveInfo = (characters.Count > 0 || anidbAnimeTitles.Count > 0 || original || artists.Count > 0);
+                        bool haveInfo = (characters.Count > 0 || anidbAnimeTitles.Count > 0 || original || artists.Count > 0 || copyrights.Count > 0);
                         //We've got all the info we need to reply
                         string reply = "**You have summoned the mighty /u/WhichMoeBot!** v" + VERSION + "\r\n\r\n";
                         if (!haveInfo) {
@@ -185,16 +185,16 @@ namespace RedditBots {
                             if (original) {
                                 reply += "* The work appears to be original\r\n\r\n";
                             } else {
-                                if (anidbAnimeTitles.Count > 0) {
+                                if (copyrights.Count > 0) {
+                                    reply += "* Source(s) - " + String.Join(", ", copyrights) + "\r\n";
+                                } else if (anidbAnimeTitles.Count > 0) {
                                     reply += "\r\nHere is some info about the anime, manga, game(s), etc. the image's characters come from:\r\n\r\n";
-                                    foreach(var title in anidbAnimeTitles) {
+                                    foreach (var title in anidbAnimeTitles) {
                                         animetitlesAnimeTitle japaneseOfficial = title.title.First(t => (t.lang == "ja" && t.type == "official"));
                                         animetitlesAnimeTitle main = title.title.First(t => t.type == "main");
                                         reply += "Main title: **" + main.Value + "**\r\n\r\nOfficial Japanese title: " + japaneseOfficial.Value + "\r\n\r\n";
                                     }
 
-                                } else if(copyrights.Count > 0) {
-                                    reply += "* Source(s) - " + String.Join(", ", copyrights) + "\r\n";
                                 }
                             }
                         }
@@ -204,14 +204,14 @@ namespace RedditBots {
                         if (anidbAnimeTitles.Count > 0) {
                             sources.Add("^^[AniDb](http://anidb.net/)");
                         }
-                        if(pixivWork != null) {
+                        if (pixivWork != null) {
                             sources.Add("^^[Pixiv](http://www.pixiv.net/member_illust.php?mode=medium&illust_id=" + pixivWork.id + ")");
                         }
-                        if(danbooruPost != null) {
+                        if (danbooruPost != null) {
                             sources.Add("^^[Danbooru](https://danbooru.donmai.us/posts/" + danbooruPost.id + ")");
                         }
                         reply += String.Join(", ", sources);
-                        retVal += "WhichMoeBot commented on " + p.Url;
+                        retVal += "WhichMoeBot commented on " + p.Shortlink;
                         Console.Write(reply);
 
                         //Save Comment, send comment to reddit here
@@ -229,8 +229,8 @@ namespace RedditBots {
         public bool CheckForSummon(string comment) {
             //
             bool summon = config.summons.Any(s => (comment.ToLower().Contains(s.Value.ToLower()) && s.enabled));
-            //return true; //For testing. CHANGE THIS
-            return summon;
+            return true; //For testing. CHANGE THIS
+            //return summon;
         }
 
 
