@@ -7,8 +7,18 @@ using System.Xml.Serialization;
 
 namespace RedditBots {
     public class AniDBHandler : AbstractHandler {
+
+        //AniDB HTTP Api constants
+        private const string ANI_DB_QUERY_URL = "api.anidb.net:9001/httpapi?client=whichmoebot&clientver=1&protover=1&request=anime&aid=";
+        private const string ANI_DB_CLIENT_NAME = "whichmoebot";
+        private const int ANI_DB_CLIENT_VERSION = 1;
+        private const int PROTOVER = 1;
+        private const string REQUEST = "anime";
+
+
         private const string ANI_DB_DUMP_URL = "http://anidb.net/api/anime-titles.xml.gz";
         private const int MAX_DB_AGE = 168; //Maximum age of database in hours
+        private const float MIN_STRING_SIMILARITY = .9f;
 
         DatabaseHandler databaseHandler;
 
@@ -34,13 +44,19 @@ namespace RedditBots {
                 if (reader.HasRows) {
                     animetitlesAnime lastAnime = new animetitlesAnime();
                     List<animetitlesAnimeTitle> lastTitles = new List<animetitlesAnimeTitle>();
+                    //Accepted title uses Levenshtein distance to determine if the title should be accepted in the return results
+                    bool acceptedTitle = false;
                     while (reader.Read()) {
                         int aid = (int)reader.GetInt32(1); //First result is the animeID
                         //If the current animeId is not the same aid as the lastAnime,
                         //add that anime to the list and re-initialize lastAnime
                         if (aid != lastAnime.aid && lastAnime.aid != 0) {
-                            lastAnime.title = lastTitles.ToArray(); //We have to do this because it'd be more work to resize the array every time another title is added
-                            anime.Add(lastAnime);
+                            if (acceptedTitle) {
+                                lastAnime.title = lastTitles.ToArray(); //We have to do this because it'd be more work to resize the array every time another title is added
+                                anime.Add(lastAnime);
+                                acceptedTitle = false;
+                            }
+                            lastTitles = new List<animetitlesAnimeTitle>();
                             lastAnime = new animetitlesAnime();
                         }
                         //This is only useful if it's a new anime
@@ -50,12 +66,17 @@ namespace RedditBots {
                         newTitle.type = reader["type"].ToString(); //type
                         newTitle.lang = reader["language"].ToString(); //xml:lang
                         newTitle.Value = reader["title"].ToString(); //Value
+                        if (GetSimilarity(newTitle.Value, title) > MIN_STRING_SIMILARITY) {
+                            acceptedTitle = true;
+                        }
 
                         lastTitles.Add(newTitle);
                     }
                     //Cuts off last result if we don't do this here
-                    lastAnime.title = lastTitles.ToArray();
-                    anime.Add(lastAnime);
+                    if (acceptedTitle) {
+                        lastAnime.title = lastTitles.ToArray();
+                        anime.Add(lastAnime);
+                    }
                 }
             }
             return anime;
@@ -66,12 +87,14 @@ namespace RedditBots {
         /// </summary>
         /// <param name="titles">IEnumerable of strings to search for in anime titles</param>
         /// <returns>List of anime objects</returns>
-        public List<animetitlesAnime> SearchTitleList(IEnumerable<string> titles) {
+        public List<animetitlesAnime> SearchTitleList(List<string> titles) {
+
             List<animetitlesAnime> anime = new List<animetitlesAnime>();
+            if (titles.Count < 1) return anime;
 
             string sql = "SELECT * FROM AnimeTitle WHERE animeID IN (SELECT animeID FROM AnimeTitle WHERE ";
             foreach (string t in titles) {
-                sql += "title LIKE \"%" + t + "%\" OR ";
+                sql += "title LIKE \"%" + t + "%\" OR "; //wildcards 3 after
             }
             sql = sql.Remove(sql.LastIndexOf(" OR"));
             sql += ") ORDER BY animeID";
@@ -79,13 +102,19 @@ namespace RedditBots {
                 if (reader.HasRows) {
                     animetitlesAnime lastAnime = new animetitlesAnime();
                     List<animetitlesAnimeTitle> lastTitles = new List<animetitlesAnimeTitle>();
+                    //Accepted title uses Levenshtein distance to determine if the title should be accepted in the return results
+                    bool acceptedTitle = false;
                     while (reader.Read()) {
                         int aid = (int)reader.GetInt32(1); //First result is the animeID
                         //If the current animeId is not the same aid as the lastAnime,
                         //add that anime to the list and re-initialize lastAnime
                         if (aid != lastAnime.aid && lastAnime.aid != 0) {
-                            lastAnime.title = lastTitles.ToArray(); //We have to do this because it'd be more work to resize the array every time another title is added
-                            anime.Add(lastAnime);
+                            if (acceptedTitle) {
+                                lastAnime.title = lastTitles.ToArray(); //We have to do this because it'd be more work to resize the array every time another title is added
+                                anime.Add(lastAnime);
+                                acceptedTitle = false;
+                            }
+                            lastTitles = new List<animetitlesAnimeTitle>();
                             lastAnime = new animetitlesAnime();
                         }
                         //This is only useful if it's a new anime
@@ -95,12 +124,21 @@ namespace RedditBots {
                         newTitle.type = reader["type"].ToString(); //type
                         newTitle.lang = reader["language"].ToString(); //xml:lang
                         newTitle.Value = reader["title"].ToString(); //Value
+                        foreach (string t in titles) {
+                            double sim = GetSimilarity(t, newTitle.Value);
+                            if (sim > MIN_STRING_SIMILARITY) {
+                                acceptedTitle = true;
+                            }
+                        }
+
 
                         lastTitles.Add(newTitle);
                     }
                     //Cuts off last result if we don't do this here
-                    lastAnime.title = lastTitles.ToArray();
-                    anime.Add(lastAnime);
+                    if (acceptedTitle) {
+                        lastAnime.title = lastTitles.ToArray();
+                        anime.Add(lastAnime);
+                    }
                 }
             }
             return anime;
@@ -197,5 +235,58 @@ namespace RedditBots {
             } // End Using System.IO.FileStream fstrmCompressedFile 
 
         } // End
+
+        //Taken from: http://www.dotnetperls.com/levenshtein
+        /// <summary>
+        /// Compute the distance between two strings.
+        /// </summary>
+        public static int LevenshteinDistance(string s, string t) {
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            // Step 1
+            if (n == 0) {
+                return m;
+            }
+
+            if (m == 0) {
+                return n;
+            }
+
+            // Step 2
+            for (int i = 0; i <= n; d[i, 0] = i++) {
+            }
+
+            for (int j = 0; j <= m; d[0, j] = j++) {
+            }
+
+            // Step 3
+            for (int i = 1; i <= n; i++) {
+                //Step 4
+                for (int j = 1; j <= m; j++) {
+                    // Step 5
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+
+                    // Step 6
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+            // Step 7
+            return d[n, m];
+        }
+        //Taken from: http://www.codeproject.com/Articles/11157/An-improvement-on-capturing-similarity-between-str
+        public static float GetSimilarity(string string1, string string2) {
+            float dis = LevenshteinDistance(string1, string2);
+            float maxLen = string1.Length;
+            if (maxLen < string2.Length)
+                maxLen = string2.Length;
+            if (maxLen == 0.0F)
+                return 1.0F;
+            else
+                return 1.0F - dis / maxLen;
+        }
     }
 }
