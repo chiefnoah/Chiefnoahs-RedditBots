@@ -26,7 +26,12 @@ namespace RedditBots {
 
         public static void Main(string[] args) {
             WhichMoeBot moeBot = new WhichMoeBot();
-            string log = moeBot.Run();
+            string log = "";
+            try {
+                log = moeBot.Run();
+            } catch (Exception e) {
+                log = "WhichMoeBot error!\r\nMessage:" + e.Message + "\r\nStacktrace: " + e.StackTrace;
+            }
             using (StreamWriter sw = File.AppendText("cron.log")) {
                 sw.WriteLine(DateTime.Now + " - " + log);
                 Console.Write(log);
