@@ -13,6 +13,7 @@ namespace RedditBots {
 
         public const string PIXIV_BASE_URL = "https://public-api.secure.pixiv.net/v1";
         protected const string PIXIV_OAUTH_URL = "https://oauth.secure.pixiv.net/auth/token";
+        public const string PIXIV_USER_URL = "http://www.pixiv.net/member.php?id=";
 
         //See here for where I got these: https://github.com/upbit/pixivpy/blob/master/pixivpy3/api.py
         protected const string PIXIV_CLIENT_ID = "bYGKuGVw91e0NMfPGp44euvGt59s";
