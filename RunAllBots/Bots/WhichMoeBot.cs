@@ -10,7 +10,7 @@ namespace RedditBots {
 
         public const string VERSION = "1.0";
         private const string CONFIG_FILENAME = "WhichMoeConfig.xml";
-        private const int NUM_COMMENTS = 30;
+        private const int NUM_COMMENTS = 15;
 
         AniDBHandler anidbHandler;
         DanbooruHandler danbooruHandler;
@@ -194,11 +194,11 @@ namespace RedditBots {
                                     }
 
                                 } else if(copyrights.Count > 0) {
-                                    reply += "* Source(s) - " + String.Join(", ", copyrights) + "\r\n\r\n";
+                                    reply += "* Source(s) - " + String.Join(", ", copyrights) + "\r\n";
                                 }
                             }
                         }
-                        reply += "^^I ^^am ^^a ^^bot. ^^Please ^^contact ^^/u/chiefnoah ^^for ^^any ^^issues, ^^questions, ^^or ^^suggestions. ^^Image ^^info ^^not ^^guaranteed ^^to ^^be ^^accurate.\r\n\r\n^^Sources: ";
+                        reply += "\r\n^^I ^^am ^^a ^^bot. ^^Please ^^contact ^^/u/chiefnoah ^^for ^^any ^^issues, ^^questions, ^^or ^^suggestions. ^^Image ^^info ^^not ^^guaranteed ^^to ^^be ^^accurate.\r\n\r\n^^Sources: ";
                         //TODO: move this stuff up for when I check for those objects the first time
                         List<string> sources = new List<String>();
                         if (anidbAnimeTitles.Count > 0) {
