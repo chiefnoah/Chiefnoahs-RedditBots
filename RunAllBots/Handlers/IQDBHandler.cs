@@ -12,7 +12,7 @@ using System.Web;
 namespace RedditBots {
     public class IQDBHandler : AbstractHandler {
 
-        public const string IQDB_URL = "http://iqdb.org/";
+        public const string IQDB_URL = "http://danbooru.iqdb.org/";
 
         public IQDBHandler() {
 
@@ -42,7 +42,7 @@ namespace RedditBots {
         }
 
         public int GetDanbooruId(string url) {
-            string htmlPage = GetSearchPage(url);
+            string htmlPage = GetPage(url);
 
             //Return an empty list of strings if something happens
             if (htmlPage.Contains("No relevant matches")) {
@@ -50,11 +50,12 @@ namespace RedditBots {
                 return -1;
             }
 
-            Regex reg = new Regex("(?<=http://danbooru.donmai.us/posts/)[\\d]+", RegexOptions.None);
+            Regex reg = new Regex(@"(http://danbooru.donmai.us/posts/)([\d]+)", RegexOptions.None);
             Match match = reg.Match(htmlPage);
             Group group = match.Groups[0];
             try {
-                int firstId = Int32.Parse(match.Value);
+                Uri uri = new Uri(match.Value);
+                int firstId = Int32.Parse(uri.Segments.Last());
                 return firstId;
             } catch (FormatException e) {
                 retVal += "\r\nUnable to parse danbooru ID from IQDB page";
@@ -102,6 +103,36 @@ namespace RedditBots {
                 stOut.Write(postData);
                 stOut.Close(); //I think this is unnecessary because of the using thingy
             }
+
+            string htmlPage;
+            try {
+                using (HttpWebResponse res = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = res.GetResponseStream())
+                using (StreamReader sreader = new StreamReader(stream, Encoding.GetEncoding(res.CharacterSet))) {
+                    htmlPage = sreader.ReadToEnd();
+                    return htmlPage;
+                }
+            } catch (WebException e) {
+                retVal += "\r\nUnable to reach IQDB " + url;
+                return "";
+            }
+        }
+
+        public string GetPage(string url) {
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(IQDB_URL + "?url=" + url);
+            request.Method = "GET";
+            request.Accept = "*/*";
+            //request.Host = "iqdb.org";
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36";
+            request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+
+            NameValueCollection headers = new NameValueCollection();
+            headers.Add("Accept-Encoding", "gzip, deflate");
+            headers.Add("Origin", "chrome-extension://aejoelaoggembcahagimdiliamlcdmfm");
+            headers.Add("Accept-Language", "en-US,en;q=0.8,ja;q=0.6");
+
+            //request.Expect = null;
+            request.Headers.Add(headers);
 
             string htmlPage;
             try {
