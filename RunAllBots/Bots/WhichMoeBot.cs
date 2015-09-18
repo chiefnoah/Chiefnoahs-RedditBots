@@ -182,7 +182,7 @@ namespace RedditBots {
                         if (!haveInfo) {
                             reply += "Unfortunately, I was unable to find any info about this post. If I *should* have been able to something, /u/chiefnoah will be on it to figure out why!";
                         } else {
-                            reply += "Here is some info I was able to find on this [image](" + p.Url + "):^^WARNING! ^^Some ^^content ^^may ^^be ^^NSFW\r\n\r\n";
+                            reply += "Here is some info I was able to find on this [image](" + p.Url + "):\r\n\r\n^^WARNING! ^^Some ^^content ^^may ^^be ^^NSFW\r\n\r\n";
 
 
                             if (pixivWork != null) {
@@ -229,9 +229,9 @@ namespace RedditBots {
                         retVal += "WhichMoeBot commented on " + p.Shortlink;
                         Console.Write(reply);
 
-                        //Save Comment, send comment to reddit here
-                        c.Reply(reply);
+                        //Save Comment, send comment to reddit here                        
                         SaveComment(config.id, config.Account.username, c.Id);
+                        c.Reply(reply);
 
                     }
                 }
