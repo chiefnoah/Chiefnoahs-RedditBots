@@ -58,6 +58,7 @@ namespace RedditBots {
         }
 
         public static string ParseName(string tag) {
+            if (tag.Length < 1) return tag;
             List<string> name = new List<string>();
             string[] parts = tag.Split('_');
             foreach (string word in parts) {
