@@ -10,7 +10,7 @@ namespace RedditBots {
 
         public const string VERSION = "1.0";
         private const string CONFIG_FILENAME = "WhichMoeConfig.xml";
-        private const int NUM_COMMENTS = 30;
+        private const int NUM_COMMENTS = 15;
 
         AniDBHandler anidbHandler;
         DanbooruHandler danbooruHandler;
