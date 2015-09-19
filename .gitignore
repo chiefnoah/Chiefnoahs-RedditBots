@@ -5,4 +5,4 @@ packages/
 TestResults/
 RedditBotsTests1/obj/
 RedditBotsTests1/bin/
-RedditBots/Bots/Data/*
+*.xml
