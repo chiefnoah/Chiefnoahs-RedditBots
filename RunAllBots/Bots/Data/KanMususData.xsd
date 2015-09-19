@@ -36,10 +36,10 @@
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute name="username" type="xs:string" use="required" />
-            <xs:attribute name="password" type="xs:string" use="required" />
-            <xs:attribute name="id" type="xs:unsignedByte" use="required" />
             <xs:attribute name="enabled" type="xs:boolean" use="required" />
+            <xs:attribute name="id" type="xs:unsignedByte" use="required" />
+            <xs:attribute name="password" type="xs:string" use="required" />
+            <xs:attribute name="username" type="xs:string" use="required" />
           </xs:complexType>
         </xs:element>
       </xs:sequence>
