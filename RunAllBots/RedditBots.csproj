@@ -125,17 +125,7 @@
     <None Include="Bots\Data\KanMususData.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Bots\Data\PixivAuthentication.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Bots\Data\KanMususData.xml" />
-    <Content Include="Bots\Data\PixivAuthentication.xml" />
-    <Content Include="Bots\Data\SauceNAOConfig.xml" />
-    <Content Include="Bots\Data\WhichMoeConfig.xml" />
-    <Content Include="Bots\Data\MyAnimeListConfig.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
